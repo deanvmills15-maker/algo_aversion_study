@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Screen 1: Gamble Choice — Eckel-Grossman Risk Elicitation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #f8f9fb;
+    color: #1a1a2e;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  .card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
+    max-width: 640px;
+    width: 100%;
+    padding: 2.5rem 2.5rem 2rem;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 1.75rem;
+  }
+
+  .header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  .header p {
+    font-size: 0.925rem;
+    color: #64748b;
+    line-height: 1.6;
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  .badge {
+    display: inline-block;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.75rem;
+    border-radius: 100px;
+    margin-bottom: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  /* ── Probability pills ── */
+  .prob-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .prob-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 100px;
+    padding: 0.45rem 1rem;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: #475569;
+  }
+
+  .prob-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .prob-dot.green { background: #22c55e; }
+  .prob-dot.red   { background: #ef4444; }
+
+  /* ── Table ── */
+  .gamble-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 1.25rem 0;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .gamble-table thead th {
+    background: #0f172a;
+    color: #ffffff;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.85rem 1rem;
+    text-align: center;
+    border-bottom: none;
+  }
+
+  .gamble-table thead th:first-child {
+    text-align: center;
+    width: 80px;
+  }
+
+  .gamble-table thead th.outcome-high { color: #86efac; }
+  .gamble-table thead th.outcome-low  { color: #fca5a5; }
+  .gamble-table thead th.ev-col       { color: #93c5fd; }
+
+  .gamble-table tbody tr {
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .gamble-table tbody tr:hover {
+    background: #f1f5f9;
+  }
+
+  .gamble-table tbody tr.selected {
+    background: #eff6ff;
+  }
+
+  .gamble-table tbody td {
+    padding: 0.9rem 1rem;
+    text-align: center;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #334155;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .gamble-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  /* Radio */
+  .radio-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+  }
+
+  .radio-wrap input[type="radio"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #cbd5e1;
+    border-radius: 50%;
+    transition: all 0.15s ease;
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .radio-wrap input[type="radio"]:hover {
+    border-color: #2563eb;
+  }
+
+  .radio-wrap input[type="radio"]:checked {
+    border-color: #2563eb;
+    background: #2563eb;
+    box-shadow: inset 0 0 0 3px #ffffff;
+  }
+
+  /* Money formatting */
+  .amount-high {
+    color: #16a34a;
+    font-weight: 600;
+  }
+  .amount-low {
+    color: #dc2626;
+    font-weight: 600;
+  }
+  .amount-ev {
+    color: #2563eb;
+    font-weight: 600;
+  }
+
+  /* Risk label */
+  .risk-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    margin-left: 0.5rem;
+  }
+  .risk-low  { background: #dcfce7; color: #15803d; }
+  .risk-high { background: #fee2e2; color: #b91c1c; }
+
+  /* Risk spectrum bar */
+  .risk-spectrum {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0.5rem 0 0;
+    padding: 0 0.25rem;
+  }
+  .risk-spectrum span {
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .risk-bar {
+    flex: 1;
+    height: 3px;
+    margin: 0 0.75rem;
+    border-radius: 2px;
+    background: linear-gradient(to right, #22c55e, #eab308, #ef4444);
+    opacity: 0.45;
+  }
+
+  /* Submit */
+  .submit-area {
+    text-align: center;
+    margin-top: 1.5rem;
+  }
+
+  .btn-submit {
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 0.8rem 2.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: -0.01em;
+  }
+
+  .btn-submit:hover {
+    background: #1d4ed8;
+    box-shadow: 0 4px 12px rgba(37,99,235,0.3);
+    transform: translateY(-1px);
+  }
+
+  .btn-submit:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+  }
+
+  .footnote {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.78rem;
+    color: #94a3b8;
+  }
+
+  /* Gamble label in first col */
+  .gamble-id {
+    font-weight: 600;
+    color: #64748b;
+    font-size: 0.85rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="header">
+    <div class="badge">Stage 1 of 3</div>
+    <h1>Choose Your Gamble</h1>
+    <p>Each gamble pays one of two amounts, each equally likely (50/50). Please select the gamble you would like to play.</p>
+  </div>
+
+  <div class="prob-header">
+    <span class="prob-pill"><span class="prob-dot green"></span> 50% chance: High Payoff</span>
+    <span class="prob-pill"><span class="prob-dot red"></span> 50% chance: Low Payoff</span>
+  </div>
+
+  <table class="gamble-table">
+    <thead>
+      <tr>
+        <th>Select</th>
+        <th>Gamble</th>
+        <th class="outcome-high">High Payoff</th>
+        <th class="outcome-low">Low Payoff</th>
+        <th class="ev-col">Expected Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr onclick="selectGamble(1)">
+        <td>
+          <label class="radio-wrap">
+            <input type="radio" name="gamble" value="1" id="g1">
+          </label>
+        </td>
+        <td><span class="gamble-id">1</span> <span class="risk-label risk-low">Low Risk</span></td>
+        <td class="amount-high">$28</td>
+        <td class="amount-low">$28</td>
+        <td class="amount-ev">$28.00</td>
+      </tr>
+      <tr onclick="selectGamble(2)">
+        <td>
+          <label class="radio-wrap">
+            <input type="radio" name="gamble" value="2" id="g2">
+          </label>
+        </td>
+        <td><span class="gamble-id">2</span></td>
+        <td class="amount-high">$36</td>
+        <td class="amount-low">$24</td>
+        <td class="amount-ev">$30.00</td>
+      </tr>
+      <tr onclick="selectGamble(3)">
+        <td>
+          <label class="radio-wrap">
+            <input type="radio" name="gamble" value="3" id="g3">
+          </label>
+        </td>
+        <td><span class="gamble-id">3</span></td>
+        <td class="amount-high">$44</td>
+        <td class="amount-low">$20</td>
+        <td class="amount-ev">$32.00</td>
+      </tr>
+      <tr onclick="selectGamble(4)">
+        <td>
+          <label class="radio-wrap">
+            <input type="radio" name="gamble" value="4" id="g4">
+          </label>
+        </td>
+        <td><span class="gamble-id">4</span></td>
+        <td class="amount-high">$52</td>
+        <td class="amount-low">$16</td>
+        <td class="amount-ev">$34.00</td>
+      </tr>
+      <tr onclick="selectGamble(5)">
+        <td>
+          <label class="radio-wrap">
+            <input type="radio" name="gamble" value="5" id="g5">
+          </label>
+        </td>
+        <td><span class="gamble-id">5</span> <span class="risk-label risk-high">High Risk</span></td>
+        <td class="amount-high">$60</td>
+        <td class="amount-low">$12</td>
+        <td class="amount-ev">$36.00</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="risk-spectrum">
+    <span>Safe</span>
+    <div class="risk-bar"></div>
+    <span>Risky</span>
+  </div>
+
+  <div class="submit-area">
+    <button class="btn-submit" id="submitBtn" disabled onclick="submitChoice()">Confirm Selection</button>
+  </div>
+
+  <p class="footnote">One gamble will be randomly selected for payment at the end of the study.</p>
+</div>
+
+<script>
+  function selectGamble(n) {
+    document.getElementById('g' + n).checked = true;
+    document.querySelectorAll('.gamble-table tbody tr').forEach(r => r.classList.remove('selected'));
+    document.getElementById('g' + n).closest('tr').classList.add('selected');
+    document.getElementById('submitBtn').disabled = false;
+  }
+
+  function submitChoice() {
+    const selected = document.querySelector('input[name="gamble"]:checked');
+    if (selected) {
+      alert('Gamble ' + selected.value + ' selected! (In oTree this submits the form.)');
+    }
+  }
+</script>
+
+</body>
+</html>
