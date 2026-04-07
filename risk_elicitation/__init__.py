@@ -1,7 +1,7 @@
 from otree.api import *
 
 doc = """
-Eckel-Grossman risk elicitation. Participants choose one of 5 gambles
+Eckel-Grossman risk elicitation. Participants choose one of 5 investment options
 with 50/50 payoffs. Choice stored as gamble_choice (1-5).
 """
 

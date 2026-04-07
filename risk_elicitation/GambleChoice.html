@@ -1,4 +1,4 @@
-{% block title %}Choose Your Gamble{% endblock %}
+{% block title %}Choose Your Investment Option{% endblock %}
 
 {% block content %}
 
@@ -53,15 +53,14 @@
     white-space: nowrap;
   }
 
-  .eg-table thead th.th-a { color: #93c5fd; }
-  .eg-table thead th.th-b { color: #fdba74; }
-
   .eg-table tbody tr { cursor: pointer; }
   .eg-table tbody tr.eg-selected { background-color: #eff6ff !important; }
 
-  .td-a   { color: #1d4ed8; font-weight: 600; }
-  .td-pos { color: #92400e; font-weight: 600; }
-  .td-neg { color: #dc2626; font-weight: 600; }
+  .eg-table tbody td {
+    color: #1e293b;
+    font-weight: 500;
+    font-size: .95rem;
+  }
 
   /* Custom radio */
   .eg-radio {
@@ -82,16 +81,6 @@
     box-shadow: inset 0 0 0 3px #fff;
   }
 
-  /* Spectrum */
-  .eg-spectrum {
-    display: flex;
-    align-items: center;
-    gap: .75rem;
-    margin: 1rem 0 1.5rem;
-  }
-  .eg-spectrum span { font-size: .72rem; font-weight: 500; color: #94a3b8; text-transform: uppercase; letter-spacing: .05em; }
-  .eg-spectrum-bar  { flex: 1; height: 3px; border-radius: 2px; background: linear-gradient(to right, #22c55e, #eab308, #ef4444); opacity: .45; }
-
   /* Submit */
   #eg-submit {
     display: block;
@@ -105,6 +94,7 @@
     font-weight: 600;
     cursor: pointer;
     transition: all .2s;
+    margin-top: 1.25rem;
     margin-bottom: .75rem;
   }
   #eg-submit:hover:not(:disabled) {
@@ -122,8 +112,8 @@
 <div class="eg-card">
   <div class="text-center">
     <span class="eg-stage-badge">Stage 1 of 3</span>
-    <h2>Choose Your Gamble</h2>
-    <p class="eg-sub">Each gamble pays one of two amounts — each with a 50% chance. Select the gamble you would like to play.</p>
+    <h2>Choose Your Investment Option</h2>
+    <p class="eg-sub">Each option pays one of two amounts — each with a 50% chance. Select the option you would like.</p>
   </div>
 
   <form method="post">
@@ -140,9 +130,9 @@
           <thead>
             <tr>
               <th>Select</th>
-              <th>Gamble</th>
-              <th class="th-a">Outcome A (50%)</th>
-              <th class="th-b">Outcome B (50%)</th>
+              <th>Option</th>
+              <th>Outcome A (50% Chance)</th>
+              <th>Outcome B (50% Chance)</th>
             </tr>
           </thead>
           <tbody>
@@ -158,21 +148,9 @@
               </td>
               <td class="align-middle text-center text-nowrap">
                 <strong>{{ g.num }}</strong>
-                {% if g.num == 1 %}
-                  &nbsp;<span class="badge rounded-pill bg-success">Sure Thing</span>
-                {% endif %}
-                {% if g.num == 5 %}
-                  &nbsp;<span class="badge rounded-pill bg-danger">High Risk</span>
-                {% endif %}
               </td>
-              <td class="align-middle text-center text-nowrap td-a">${{ g.a }}</td>
-              <td class="align-middle text-center text-nowrap">
-                {% if g.b < 0 %}
-                  <span class="td-neg">${{ g.b }}</span>
-                {% else %}
-                  <span class="td-pos">${{ g.b }}</span>
-                {% endif %}
-              </td>
+              <td class="align-middle text-center text-nowrap">${{ g.a }}</td>
+              <td class="align-middle text-center text-nowrap">${{ g.b }}</td>
             </tr>
             {% endfor %}
           </tbody>
@@ -180,16 +158,10 @@
       </div>
     </div>
 
-    <div class="eg-spectrum">
-      <span>Safe</span>
-      <div class="eg-spectrum-bar"></div>
-      <span>Risky</span>
-    </div>
-
     <button type="submit" id="eg-submit" disabled>Confirm Selection</button>
   </form>
 
-  <p class="eg-footnote">One gamble will be randomly selected for payment at the end of the study.</p>
+  <p class="eg-footnote">One option will be randomly selected for payment at the end of the study.</p>
 </div>
 
 <script>
