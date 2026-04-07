@@ -1,0 +1,251 @@
+{% block title %}Valuation Task{% endblock %}
+
+{% block content %}
+
+<style>
+  body { background: #f8f9fb; }
+
+  .vt-card {
+    max-width: 660px;
+    margin: 2.5rem auto;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  .vt-stage-badge {
+    display: inline-block;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: .75rem;
+    font-weight: 600;
+    padding: .25rem .75rem;
+    border-radius: 100px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    margin-bottom: .75rem;
+  }
+
+  .vt-card h2 {
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 .4rem;
+    letter-spacing: -.02em;
+  }
+
+  .vt-advisor-label {
+    display: inline-block;
+    font-size: .85rem;
+    font-weight: 600;
+    color: #334155;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: .3rem .75rem;
+    margin-bottom: 1rem;
+  }
+
+  .vt-sub {
+    font-size: .9rem;
+    color: #64748b;
+    line-height: 1.6;
+    margin: 0 0 1.25rem;
+  }
+
+  /* Table header */
+  .vt-table thead th {
+    background: #0f172a;
+    color: #fff;
+    font-size: .78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    border: none;
+    padding: .85rem 1rem;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .vt-table tbody tr { cursor: pointer; }
+  .vt-table tbody tr.vt-selected-a { background-color: #f8fafc !important; }
+  .vt-table tbody tr.vt-selected-b { background-color: #eff6ff !important; }
+
+  .vt-table tbody td {
+    color: #1e293b;
+    font-weight: 500;
+    font-size: .95rem;
+    padding: .75rem 1rem;
+    vertical-align: middle;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  /* Custom radio */
+  .vt-radio {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 20px; height: 20px;
+    border: 2px solid #cbd5e1;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all .15s;
+    display: inline-block;
+    vertical-align: middle;
+  }
+  .vt-radio:hover   { border-color: #2563eb; }
+  .vt-radio:checked {
+    border-color: #2563eb;
+    background: #2563eb;
+    box-shadow: inset 0 0 0 3px #fff;
+  }
+
+  /* Submit */
+  #vt-submit {
+    display: block;
+    width: 100%;
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: .85rem;
+    font-size: .95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+    margin-top: 1.25rem;
+    margin-bottom: .75rem;
+  }
+  #vt-submit:hover:not(:disabled) {
+    background: #1d4ed8;
+    box-shadow: 0 4px 12px rgba(37,99,235,.3);
+    transform: translateY(-1px);
+  }
+  #vt-submit:disabled { background: #94a3b8; cursor: not-allowed; }
+
+  .vt-footnote { text-align: center; font-size: .78rem; color: #94a3b8; }
+
+  .otree-btn-next { display: none !important; }
+</style>
+
+<div class="vt-card">
+  <div class="text-center">
+    <span class="vt-stage-badge">Round {{ player.round_number }} of 5</span>
+    <h2>Investment Advice Valuation</h2>
+    <div class="vt-advisor-label">Advisor: {{ advisor_type }}</div>
+    <p class="vt-sub">
+      For each fee listed, choose whether you prefer to manage your portfolio
+      yourself (Option A) or pay for {{ advisor_type }} advice (Option B).
+    </p>
+  </div>
+
+  <form method="post" id="vt-form">
+
+    <div class="card shadow-sm">
+      <div class="card-body p-0">
+        <table class="table table-hover vt-table mb-0">
+          <colgroup>
+            <col style="width: 34%">
+            <col style="width: 33%">
+            <col style="width: 33%">
+          </colgroup>
+          <thead>
+            <tr>
+              <th>Investment Fee</th>
+              <th>Option A — Self-Managed</th>
+              <th>Option B — {{ advisor_type }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for price in prices %}
+            <tr data-price="{{ price }}">
+              <td class="fw-semibold">${{ price }}</td>
+              <td>
+                <input class="vt-radio"
+                       type="radio"
+                       name="row_{{ price }}"
+                       id="a_{{ price }}"
+                       value="A"
+                       onchange="handleChoice('A', {{ price }})">
+              </td>
+              <td>
+                <input class="vt-radio"
+                       type="radio"
+                       name="row_{{ price }}"
+                       id="b_{{ price }}"
+                       value="B"
+                       onchange="handleChoice('B', {{ price }})">
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    {# Hidden field oTree reads for switch_point #}
+    <input type="hidden" name="switch_point" id="switch_point_input" value="">
+
+    <button type="submit" id="vt-submit" disabled>Confirm &amp; Continue</button>
+  </form>
+
+  <p class="vt-footnote">Your responses may be used to determine your final payment.</p>
+</div>
+
+<script>
+  var PRICES = {{ prices }};
+
+  function handleChoice(choice, clickedPrice) {
+    if (choice === 'B') {
+      // Selecting B at row X: auto-select B for all rows > X (higher fees)
+      PRICES.forEach(function(p) {
+        if (p > clickedPrice) {
+          document.getElementById('b_' + p).checked = true;
+          highlightRow(p, 'B');
+        }
+      });
+      // Auto-select A for all rows < X (lower fees)
+      PRICES.forEach(function(p) {
+        if (p < clickedPrice) {
+          document.getElementById('a_' + p).checked = true;
+          highlightRow(p, 'A');
+        }
+      });
+    } else {
+      // Selecting A at row X: auto-select A for all rows < X
+      PRICES.forEach(function(p) {
+        if (p < clickedPrice) {
+          document.getElementById('a_' + p).checked = true;
+          highlightRow(p, 'A');
+        }
+      });
+    }
+    highlightRow(clickedPrice, choice);
+    computeSwitchPoint();
+  }
+
+  function highlightRow(price, choice) {
+    var row = document.querySelector('tr[data-price="' + price + '"]');
+    if (row) {
+      row.classList.remove('vt-selected-a', 'vt-selected-b');
+      row.classList.add(choice === 'B' ? 'vt-selected-b' : 'vt-selected-a');
+    }
+  }
+
+  function computeSwitchPoint() {
+    // Switch point = highest price at which participant chose B (or 0 if none)
+    var sp = 0;
+    PRICES.forEach(function(p) {
+      var radio = document.getElementById('b_' + p);
+      if (radio && radio.checked) sp = p;
+    });
+    document.getElementById('switch_point_input').value = sp > 0 ? sp : 1;
+
+    // Enable submit only if every row has a selection
+    var allSelected = PRICES.every(function(p) {
+      return document.getElementById('a_' + p).checked ||
+             document.getElementById('b_' + p).checked;
+    });
+    document.getElementById('vt-submit').disabled = !allSelected;
+  }
+</script>
+
+{% endblock %}

@@ -7,6 +7,18 @@ SESSION_CONFIGS = [
         app_sequence=['risk_elicitation'],
         num_demo_participants=1,
     ),
+    dict(
+        name='valuation_task',
+        display_name='Valuation Task (WTP for Advice)',
+        app_sequence=['valuation_task'],
+        num_demo_participants=1,
+    ),
+    dict(
+        name='algo_aversion_full',
+        display_name='Algo Aversion — Full Study',
+        app_sequence=['risk_elicitation', 'valuation_task'],
+        num_demo_participants=1,
+    ),
 ]
 
 # if you set a property in SESSION_CONFIG_DEFAULTS, it will be inherited by all configs
