@@ -66,8 +66,10 @@
   }
 
   .vt-table tbody tr { cursor: pointer; }
-  .vt-table tbody tr.vt-selected-a { background-color: #f8fafc !important; }
-  .vt-table tbody tr.vt-selected-b { background-color: #eff6ff !important; }
+  /* B (advisor) rows: clean white — the default/preferred state */
+  .vt-table tbody tr.vt-row-b { background-color: #ffffff !important; }
+  /* A (self-managed) rows: muted grey — visually "inactive" */
+  .vt-table tbody tr.vt-row-a { background-color: #f1f5f9 !important; color: #94a3b8; }
 
   .vt-table tbody td {
     color: #1e293b;
@@ -184,7 +186,7 @@
     {# Hidden field oTree reads for switch_point #}
     <input type="hidden" name="switch_point" id="switch_point_input" value="">
 
-    <button type="submit" id="vt-submit" disabled>Confirm &amp; Continue</button>
+    <button type="submit" id="vt-submit">Confirm &amp; Continue</button>
   </form>
 
   <p class="vt-footnote">Your responses may be used to determine your final payment.</p>
@@ -193,59 +195,40 @@
 <script>
   var PRICES = {{ prices }};
 
-  function handleChoice(choice, clickedPrice) {
-    if (choice === 'B') {
-      // Selecting B at row X: auto-select B for all rows > X (higher fees)
-      PRICES.forEach(function(p) {
-        if (p > clickedPrice) {
-          document.getElementById('b_' + p).checked = true;
-          highlightRow(p, 'B');
-        }
-      });
-      // Auto-select A for all rows < X (lower fees)
-      PRICES.forEach(function(p) {
-        if (p < clickedPrice) {
-          document.getElementById('a_' + p).checked = true;
-          highlightRow(p, 'A');
-        }
-      });
-    } else {
-      // Selecting A at row X: auto-select A for all rows < X
-      PRICES.forEach(function(p) {
-        if (p < clickedPrice) {
-          document.getElementById('a_' + p).checked = true;
-          highlightRow(p, 'A');
-        }
-      });
-    }
-    highlightRow(clickedPrice, choice);
-    computeSwitchPoint();
-  }
-
-  function highlightRow(price, choice) {
-    var row = document.querySelector('tr[data-price="' + price + '"]');
-    if (row) {
-      row.classList.remove('vt-selected-a', 'vt-selected-b');
-      row.classList.add(choice === 'B' ? 'vt-selected-b' : 'vt-selected-a');
-    }
-  }
-
-  function computeSwitchPoint() {
-    // Switch point = highest price at which participant chose B (or 0 if none)
-    var sp = 0;
+  /*
+   * setSwitchPoint(sp):
+   *   Prices 1..sp  → Option B (Advisor)   — white rows
+   *   Prices sp+1..10 → Option A (Self-managed) — grey rows
+   *   switch_point = sp (highest price willing to pay; 0 = never)
+   */
+  function setSwitchPoint(sp) {
     PRICES.forEach(function(p) {
-      var radio = document.getElementById('b_' + p);
-      if (radio && radio.checked) sp = p;
+      var isB = (p <= sp);
+      document.getElementById('b_' + p).checked =  isB;
+      document.getElementById('a_' + p).checked = !isB;
+      var row = document.querySelector('tr[data-price="' + p + '"]');
+      if (row) {
+        row.classList.toggle('vt-row-b',  isB);
+        row.classList.toggle('vt-row-a', !isB);
+      }
     });
-    document.getElementById('switch_point_input').value = sp > 0 ? sp : 1;
-
-    // Enable submit only if every row has a selection
-    var allSelected = PRICES.every(function(p) {
-      return document.getElementById('a_' + p).checked ||
-             document.getElementById('b_' + p).checked;
-    });
-    document.getElementById('vt-submit').disabled = !allSelected;
+    document.getElementById('switch_point_input').value = sp;
   }
+
+  function handleChoice(choice, clickedPrice) {
+    if (choice === 'A') {
+      // Switching OFF at this price: last willing price = clickedPrice - 1
+      setSwitchPoint(clickedPrice - 1);
+    } else {
+      // Switching back ON at this price: willing up to clickedPrice
+      setSwitchPoint(clickedPrice);
+    }
+  }
+
+  // Initialise: all rows pre-selected as B (Advisor), switch_point = 10
+  document.addEventListener('DOMContentLoaded', function () {
+    setSwitchPoint(10);
+  });
 </script>
 
 {% endblock %}

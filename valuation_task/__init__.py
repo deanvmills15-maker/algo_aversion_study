@@ -35,7 +35,7 @@ class Group(BaseGroup):
 class Player(BasePlayer):
     switch_point = models.IntegerField(
         label='',
-        min=1,
+        min=0,   # 0 = unwilling to pay even $1 for advice
         max=10,
     )
 
