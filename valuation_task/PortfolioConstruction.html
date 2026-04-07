@@ -1,0 +1,580 @@
+{% block title %}Portfolio Construction{% endblock %}
+
+{% block content %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+  body { background: #f8f9fb; }
+
+  .pc-wrap {
+    max-width: 960px;
+    margin: 2rem auto;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  /* ── Header ── */
+  .pc-stage-badge {
+    display: inline-block;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: .72rem;
+    font-weight: 600;
+    padding: .25rem .75rem;
+    border-radius: 100px;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    margin-bottom: .65rem;
+  }
+
+  .pc-wrap h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 .35rem;
+    letter-spacing: -.02em;
+  }
+
+  .pc-sub {
+    font-size: .875rem;
+    color: #64748b;
+    line-height: 1.6;
+    margin: 0 0 1.5rem;
+  }
+
+  /* ── Asset rows ── */
+  .asset-row {
+    padding: .65rem 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .asset-row:last-child { border-bottom: none; }
+
+  .asset-top {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin-bottom: .35rem;
+  }
+
+  /* Lock toggle */
+  .lock-checkbox { display: none; }
+
+  .lock-btn {
+    cursor: pointer;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    border: 1.5px solid #e2e8f0;
+    background: #f8fafc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .85rem;
+    transition: all .15s;
+    flex-shrink: 0;
+    user-select: none;
+  }
+  .lock-btn:hover { border-color: #94a3b8; }
+  .lock-checkbox:checked + .lock-btn {
+    background: #fef9c3;
+    border-color: #ca8a04;
+  }
+
+  .asset-dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .asset-name {
+    font-size: .875rem;
+    font-weight: 600;
+    color: #1e293b;
+    flex: 1;
+  }
+
+  .return-chip {
+    font-size: .72rem;
+    font-weight: 500;
+    padding: .15rem .55rem;
+    border-radius: 4px;
+    background: #f1f5f9;
+    color: #475569;
+    white-space: nowrap;
+  }
+
+  .alloc-pct {
+    font-size: .9rem;
+    font-weight: 700;
+    color: #0f172a;
+    min-width: 40px;
+    text-align: right;
+  }
+
+  /* Range slider */
+  .pc-slider {
+    width: 100%;
+    accent-color: #2563eb;
+    cursor: pointer;
+    transition: opacity .2s;
+  }
+  .pc-slider:disabled {
+    opacity: .35;
+    cursor: not-allowed;
+  }
+
+  /* ── Right panel ── */
+  .chart-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+    padding-left: .5rem;
+  }
+
+  .chart-wrap {
+    width: 210px;
+    height: 210px;
+    flex-shrink: 0;
+  }
+
+  /* Portfolio summary box */
+  .pc-summary {
+    width: 100%;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: .9rem 1rem;
+  }
+
+  .pc-summary-title {
+    font-size: .72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: #94a3b8;
+    margin-bottom: .5rem;
+  }
+
+  .pc-stat {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    font-size: .85rem;
+    color: #475569;
+    margin-bottom: .25rem;
+  }
+  .pc-stat:last-child { margin-bottom: 0; }
+
+  .pc-stat-val {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #0f172a;
+  }
+
+  .total-ok   { color: #15803d !important; }
+  .total-warn { color: #b91c1c !important; }
+
+  /* Legend */
+  .chart-legend {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: .3rem;
+  }
+
+  .legend-row {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: .8rem;
+    color: #334155;
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .legend-pct {
+    margin-left: auto;
+    font-weight: 700;
+    color: #0f172a;
+    font-size: .8rem;
+  }
+
+  /* ── Submit ── */
+  #port-submit {
+    display: block;
+    width: 100%;
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: .85rem;
+    font-size: .95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+    margin-top: 1.5rem;
+    margin-bottom: .5rem;
+  }
+  #port-submit:hover:not(:disabled) {
+    background: #1d4ed8;
+    box-shadow: 0 4px 12px rgba(37,99,235,.3);
+    transform: translateY(-1px);
+  }
+  #port-submit:disabled { background: #94a3b8; cursor: not-allowed; }
+
+  .pc-footnote { text-align: center; font-size: .78rem; color: #94a3b8; }
+
+  .otree-btn-next { display: none !important; }
+</style>
+
+<div class="pc-wrap">
+  <div class="text-center">
+    <span class="pc-stage-badge">Stage 2 of 3 — Portfolio Construction</span>
+    <h2>Build Your Portfolio</h2>
+    <p class="pc-sub">
+      Allocate 100% across the five asset classes. Adjust the sliders —
+      unlocked assets scale proportionally. Lock any asset to hold it fixed.
+    </p>
+  </div>
+
+  {# Debug: show backend validation errors if any #}
+  {% if form.errors %}
+    <div class="alert alert-danger mb-3">
+      <strong>Form errors:</strong> {{ form.errors }}
+    </div>
+  {% endif %}
+
+  <form method="post" id="port-form">
+    {# Hidden inputs — these are what oTree reads on submit #}
+    <input type="hidden" name="alloc_tbills"  id="id_alloc_tbills"  value="20">
+    <input type="hidden" name="alloc_index"   id="id_alloc_index"   value="20">
+    <input type="hidden" name="alloc_reits"   id="id_alloc_reits"   value="20">
+    <input type="hidden" name="alloc_stocks"  id="id_alloc_stocks"  value="20">
+    <input type="hidden" name="alloc_crypto"  id="id_alloc_crypto"  value="20">
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="row g-0">
+
+          {# ── Left: Sliders ── #}
+          <div class="col-md-7 pe-md-4">
+
+            {% comment %}T-Bills{% endcomment %}
+            <div class="asset-row">
+              <div class="asset-top">
+                <input type="checkbox" class="lock-checkbox" id="lock-tbills"
+                       onchange="toggleLock('tbills')">
+                <label class="lock-btn" for="lock-tbills" title="Lock allocation">🔒</label>
+                <span class="asset-dot" style="background:#0072B2"></span>
+                <span class="asset-name">T-Bills</span>
+                <span class="return-chip">4% Expected Return</span>
+                <span class="alloc-pct" id="label-tbills">20%</span>
+              </div>
+              <input type="range" class="pc-slider" min="0" max="100" step="1"
+                     id="range-tbills" value="20"
+                     oninput="onSlide('tbills')">
+            </div>
+
+            {% comment %}Index Funds{% endcomment %}
+            <div class="asset-row">
+              <div class="asset-top">
+                <input type="checkbox" class="lock-checkbox" id="lock-index"
+                       onchange="toggleLock('index')">
+                <label class="lock-btn" for="lock-index" title="Lock allocation">🔒</label>
+                <span class="asset-dot" style="background:#E69F00"></span>
+                <span class="asset-name">Index Funds</span>
+                <span class="return-chip">8% Expected Return</span>
+                <span class="alloc-pct" id="label-index">20%</span>
+              </div>
+              <input type="range" class="pc-slider" min="0" max="100" step="1"
+                     id="range-index" value="20"
+                     oninput="onSlide('index')">
+            </div>
+
+            {% comment %}REITs{% endcomment %}
+            <div class="asset-row">
+              <div class="asset-top">
+                <input type="checkbox" class="lock-checkbox" id="lock-reits"
+                       onchange="toggleLock('reits')">
+                <label class="lock-btn" for="lock-reits" title="Lock allocation">🔒</label>
+                <span class="asset-dot" style="background:#009E73"></span>
+                <span class="asset-name">REITs</span>
+                <span class="return-chip">7% Expected Return</span>
+                <span class="alloc-pct" id="label-reits">20%</span>
+              </div>
+              <input type="range" class="pc-slider" min="0" max="100" step="1"
+                     id="range-reits" value="20"
+                     oninput="onSlide('reits')">
+            </div>
+
+            {% comment %}Common Stocks{% endcomment %}
+            <div class="asset-row">
+              <div class="asset-top">
+                <input type="checkbox" class="lock-checkbox" id="lock-stocks"
+                       onchange="toggleLock('stocks')">
+                <label class="lock-btn" for="lock-stocks" title="Lock allocation">🔒</label>
+                <span class="asset-dot" style="background:#CC79A7"></span>
+                <span class="asset-name">Common Stocks</span>
+                <span class="return-chip">12% Expected Return</span>
+                <span class="alloc-pct" id="label-stocks">20%</span>
+              </div>
+              <input type="range" class="pc-slider" min="0" max="100" step="1"
+                     id="range-stocks" value="20"
+                     oninput="onSlide('stocks')">
+            </div>
+
+            {% comment %}Cryptocurrency{% endcomment %}
+            <div class="asset-row">
+              <div class="asset-top">
+                <input type="checkbox" class="lock-checkbox" id="lock-crypto"
+                       onchange="toggleLock('crypto')">
+                <label class="lock-btn" for="lock-crypto" title="Lock allocation">🔒</label>
+                <span class="asset-dot" style="background:#F0E442; border:1px solid #d4c800"></span>
+                <span class="asset-name">Cryptocurrency</span>
+                <span class="return-chip">±40% Return</span>
+                <span class="alloc-pct" id="label-crypto">20%</span>
+              </div>
+              <input type="range" class="pc-slider" min="0" max="100" step="1"
+                     id="range-crypto" value="20"
+                     oninput="onSlide('crypto')">
+            </div>
+
+          </div>{# end col-md-7 #}
+
+          {# ── Right: Chart + Summary ── #}
+          <div class="col-md-5 border-start ps-md-4 pt-3 pt-md-0">
+            <div class="chart-panel">
+
+              <div class="chart-wrap">
+                <canvas id="portfolioChart"></canvas>
+              </div>
+
+              {# Legend #}
+              <div class="chart-legend">
+                <div class="legend-row">
+                  <span class="legend-dot" style="background:#0072B2"></span>
+                  T-Bills
+                  <span class="legend-pct" id="lpct-tbills">20%</span>
+                </div>
+                <div class="legend-row">
+                  <span class="legend-dot" style="background:#E69F00"></span>
+                  Index Funds
+                  <span class="legend-pct" id="lpct-index">20%</span>
+                </div>
+                <div class="legend-row">
+                  <span class="legend-dot" style="background:#009E73"></span>
+                  REITs
+                  <span class="legend-pct" id="lpct-reits">20%</span>
+                </div>
+                <div class="legend-row">
+                  <span class="legend-dot" style="background:#CC79A7"></span>
+                  Common Stocks
+                  <span class="legend-pct" id="lpct-stocks">20%</span>
+                </div>
+                <div class="legend-row">
+                  <span class="legend-dot" style="background:#F0E442; border:1px solid #d4c800; border-radius:50%"></span>
+                  Cryptocurrency
+                  <span class="legend-pct" id="lpct-crypto">20%</span>
+                </div>
+              </div>
+
+              {# Portfolio Summary #}
+              <div class="pc-summary">
+                <div class="pc-summary-title">Portfolio Summary</div>
+                <div class="pc-stat">
+                  Weighted Avg. Return
+                  <span class="pc-stat-val" id="wtd-return">8.2%</span>
+                </div>
+                <div class="pc-stat">
+                  Total Allocated
+                  <span class="pc-stat-val total-ok" id="total-display">100%</span>
+                </div>
+              </div>
+
+            </div>
+          </div>{# end col-md-5 #}
+
+        </div>{# end row #}
+      </div>{# end card-body #}
+    </div>{# end card #}
+
+    <button type="submit" id="port-submit">Confirm Portfolio &amp; Continue</button>
+  </form>
+
+  <p class="text-center mt-1" style="font-size:.85rem; color:#475569;">
+    Total: <strong><span id="plain-total" style="color:#15803d">100</span>%</strong>
+  </p>
+
+  <p class="pc-footnote">Your allocation will be recorded for the next stage of the study.</p>
+</div>
+
+<script>
+  var ASSETS  = ['tbills', 'index', 'reits', 'stocks', 'crypto'];
+  var RETURNS = [4, 8, 7, 12, 40];
+  var COLORS  = ['#0072B2', '#E69F00', '#009E73', '#CC79A7', '#F0E442'];
+  var LABELS  = ['T-Bills', 'Index Funds', 'REITs', 'Common Stocks', 'Cryptocurrency'];
+
+  var vals   = [20, 20, 20, 20, 20];
+  var locked = [false, false, false, false, false];
+
+  /* ── Chart ── */
+  var chart = new Chart(
+    document.getElementById('portfolioChart').getContext('2d'),
+    {
+      type: 'doughnut',
+      data: {
+        labels: LABELS,
+        datasets: [{
+          data: vals.slice(),
+          backgroundColor: COLORS,
+          borderWidth: 2,
+          borderColor: '#ffffff',
+          hoverOffset: 6,
+        }]
+      },
+      options: {
+        cutout: '58%',
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(c) { return '  ' + c.label + ': ' + c.parsed + '%'; }
+            }
+          }
+        },
+        animation: { duration: 180 },
+      }
+    }
+  );
+
+  /* ── Lock toggle ── */
+  function toggleLock(key) {
+    var idx = ASSETS.indexOf(key);
+    locked[idx] = document.getElementById('lock-' + key).checked;
+    document.getElementById('range-' + key).disabled = locked[idx];
+  }
+
+  /* ── Gap fixer: adjusts the largest unlocked asset so sum === 100 exactly ── */
+  function fixGap() {
+    var sum = vals.reduce(function(a, b) { return a + b; }, 0);
+    var gap = 100 - sum;
+    if (gap === 0) return;
+
+    /* Find the largest unlocked asset to absorb the rounding gap */
+    var bestIdx = -1;
+    var bestVal = -1;
+    ASSETS.forEach(function(_, i) {
+      if (!locked[i] && vals[i] > bestVal) {
+        bestVal = vals[i];
+        bestIdx = i;
+      }
+    });
+    if (bestIdx !== -1) {
+      vals[bestIdx] = Math.max(0, vals[bestIdx] + gap);
+    }
+  }
+
+  /* ── Slide handler ── */
+  function onSlide(changedKey) {
+    var idx    = ASSETS.indexOf(changedKey);
+    /* Ensure integer from the start */
+    var newVal = Math.round(parseInt(document.getElementById('range-' + changedKey).value, 10));
+
+    /* Sum of locked assets (not the one being moved) */
+    var lockedSum = ASSETS.reduce(function(s, _, i) {
+      return s + (locked[i] && i !== idx ? vals[i] : 0);
+    }, 0);
+
+    /* Clamp so locked assets are always honoured */
+    newVal = Math.max(0, Math.min(newVal, 100 - lockedSum));
+
+    /* Unlocked others (not changedKey) */
+    var others = ASSETS
+      .map(function(_, i) { return i; })
+      .filter(function(i) { return i !== idx && !locked[i]; });
+
+    var remaining = 100 - newVal - lockedSum;
+    var otherSum  = others.reduce(function(s, i) { return s + vals[i]; }, 0);
+
+    if (others.length === 0) {
+      /* All others locked — pin this slider to the only valid value */
+      newVal = 100 - lockedSum;
+      document.getElementById('range-' + changedKey).value = newVal;
+    } else if (otherSum === 0) {
+      /* Others are all at 0 — spread remaining equally */
+      var base     = Math.floor(remaining / others.length);
+      var leftover = remaining - base * others.length;
+      others.forEach(function(i, k) {
+        vals[i] = base + (k < leftover ? 1 : 0);
+      });
+    } else {
+      /* Proportional scaling with largest-remainder rounding */
+      var raw     = others.map(function(i) { return vals[i] * remaining / otherSum; });
+      var floored = raw.map(function(v) { return Math.floor(v); });
+      var deficit = remaining - floored.reduce(function(a, b) { return a + b; }, 0);
+      raw
+        .map(function(v, k) { return { k: k, frac: v - Math.floor(v) }; })
+        .sort(function(a, b) { return b.frac - a.frac; })
+        .forEach(function(o, rank) { if (rank < deficit) floored[o.k]++; });
+      others.forEach(function(i, k) { vals[i] = Math.max(0, floored[k]); });
+    }
+
+    vals[idx] = newVal;
+
+    /* Final safety pass — correct any ±1 rounding residual */
+    fixGap();
+    updateUI();
+  }
+
+  /* ── Sync sliders, hidden inputs, labels, chart, summary ── */
+  function updateUI() {
+    var total     = 0;
+    var wtdReturn = 0;
+
+    ASSETS.forEach(function(key, i) {
+      /* Guarantee clean integer */
+      var v = Math.round(vals[i]);
+      vals[i] = v;
+
+      /* UI elements */
+      document.getElementById('range-' + key).value       = v;
+      document.getElementById('label-' + key).textContent = v + '%';
+      document.getElementById('lpct-'  + key).textContent = v + '%';
+
+      /* Hidden inputs — what oTree actually reads on POST */
+      document.getElementById('id_alloc_' + key).value = v;
+
+      total     += v;
+      wtdReturn += v * RETURNS[i];
+    });
+
+    /* Weighted average return */
+    document.getElementById('wtd-return').textContent = (wtdReturn / 100).toFixed(1) + '%';
+
+    /* Total indicator (summary box) */
+    var totalEl = document.getElementById('total-display');
+    totalEl.textContent = total + '%';
+    totalEl.className   = 'pc-stat-val ' + (total === 100 ? 'total-ok' : 'total-warn');
+
+    /* Plain-text total below the button */
+    var plainEl = document.getElementById('plain-total');
+    plainEl.textContent = total;
+    plainEl.style.color = (total === 100) ? '#15803d' : '#b91c1c';
+
+    /* Chart */
+    chart.data.datasets[0].data = vals.slice();
+    chart.update();
+
+    /* Submit guard */
+    document.getElementById('port-submit').disabled = (total !== 100);
+  }
+</script>
+
+{% endblock %}

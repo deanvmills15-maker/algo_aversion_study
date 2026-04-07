@@ -4,6 +4,7 @@ doc = """
 Valuation task: participants state their maximum willingness-to-pay for
 professional investment advice (Human Wealth Manager or AI Advisor) across
 5 rounds. Switch point is elicited via a multiple price list (prices $1-$10).
+Portfolio construction screen collects 5-asset allocation (shown in round 1 only).
 """
 
 
@@ -39,6 +40,13 @@ class Player(BasePlayer):
         max=10,
     )
 
+    # 5-asset portfolio allocation (integers, must sum to 100)
+    alloc_tbills  = models.IntegerField(initial=20, min=0, max=100, label='T-Bills')
+    alloc_index   = models.IntegerField(initial=20, min=0, max=100, label='Index Fund')
+    alloc_reits   = models.IntegerField(initial=20, min=0, max=100, label='REITs')
+    alloc_stocks  = models.IntegerField(initial=20, min=0, max=100, label='Individual Stocks')
+    alloc_crypto  = models.IntegerField(initial=20, min=0, max=100, label='Cryptocurrency')
+
 
 class Valuation(Page):
     form_model = 'player'
@@ -53,6 +61,26 @@ class Valuation(Page):
         )
 
 
+class PortfolioConstruction(Page):
+    form_model = 'player'
+    form_fields = ['alloc_tbills', 'alloc_index', 'alloc_reits', 'alloc_stocks', 'alloc_crypto']
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+    @staticmethod
+    def error_message(player: Player, values):
+        fields = ['alloc_tbills', 'alloc_index', 'alloc_reits', 'alloc_stocks', 'alloc_crypto']
+        total = sum(values[f] for f in fields)
+        print(
+            f"[PortfolioConstruction] submitted sum={total} | "
+            + " | ".join(f"{f}={values[f]}" for f in fields)
+        )
+        if total != 100:
+            return f'Your allocations sum to {total}%. Please adjust the sliders so they total exactly 100%.'
+
+
 class Results(Page):
     @staticmethod
     def vars_for_template(player: Player):
@@ -60,4 +88,4 @@ class Results(Page):
         return dict(advisor_type=advisor_type)
 
 
-page_sequence = [Valuation, Results]
+page_sequence = [PortfolioConstruction, Valuation, Results]
