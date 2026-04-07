@@ -1,0 +1,429 @@
+{% block title %}Belief Elicitation{% endblock %}
+
+{% block content %}
+
+<style>
+  body { background: #f8f9fb; }
+
+  /* ── Sticky token counter ── */
+  .be-token-bar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #0f172a;
+    color: #fff;
+    padding: .6rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  .be-token-label {
+    font-size: .8rem;
+    font-weight: 500;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+  }
+
+  .be-token-count {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #fff;
+    transition: color .2s;
+    line-height: 1;
+  }
+
+  .be-token-count.zero { color: #4ade80; }
+  .be-token-count.warn { color: #fbbf24; }
+
+  .be-panel-label {
+    font-size: .85rem;
+    font-weight: 600;
+    color: #e2e8f0;
+    text-align: right;
+  }
+
+  .be-panel-sub {
+    font-size: .72rem;
+    color: #64748b;
+    margin-top: .1rem;
+  }
+
+  /* ── Main card ── */
+  .be-wrap {
+    max-width: 860px;
+    margin: 0 auto;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  .be-prompt {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .be-prompt h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 .35rem;
+    letter-spacing: -.02em;
+  }
+
+  .be-prompt p {
+    font-size: .875rem;
+    color: #64748b;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* ── Bin grid ── */
+  .be-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: .5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .be-bin {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #fff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    padding: .6rem .4rem .75rem;
+    transition: border-color .15s;
+  }
+
+  .be-bin.has-tokens { border-color: #93c5fd; }
+
+  /* Bin label */
+  .be-bin-label {
+    font-size: .65rem;
+    font-weight: 600;
+    color: #64748b;
+    text-align: center;
+    line-height: 1.3;
+    margin-bottom: .5rem;
+    min-height: 2.4em;
+  }
+
+  /* Histogram bar */
+  .be-bar-wrap {
+    width: 100%;
+    height: 100px;
+    background: #f1f5f9;
+    border-radius: 5px;
+    display: flex;
+    align-items: flex-end;
+    margin-bottom: .5rem;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .be-bar {
+    width: 100%;
+    background: #2563eb;
+    border-radius: 5px 5px 0 0;
+    height: 0%;
+    transition: height .2s ease;
+  }
+
+  /* Token count */
+  .be-count {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: .4rem;
+    min-width: 1.5rem;
+    text-align: center;
+  }
+
+  /* +/- buttons */
+  .be-btn-row {
+    display: flex;
+    gap: .25rem;
+  }
+
+  .be-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1.5px solid #e2e8f0;
+    background: #f8fafc;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #334155;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    transition: all .12s;
+    padding: 0;
+  }
+
+  .be-btn:hover:not(:disabled) {
+    background: #e0e7ff;
+    border-color: #818cf8;
+    color: #3730a3;
+  }
+
+  .be-btn:disabled {
+    opacity: .3;
+    cursor: not-allowed;
+  }
+
+  /* ── Continue / Submit buttons ── */
+  .be-action-btn {
+    display: block;
+    width: 100%;
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: .85rem;
+    font-size: .95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+    margin-top: .75rem;
+  }
+
+  .be-action-btn:hover:not(:disabled) {
+    background: #1d4ed8;
+    box-shadow: 0 4px 12px rgba(37,99,235,.3);
+    transform: translateY(-1px);
+  }
+
+  .be-action-btn:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .be-footnote {
+    text-align: center;
+    font-size: .78rem;
+    color: #94a3b8;
+    margin-top: .75rem;
+  }
+
+  .otree-btn-next { display: none !important; }
+</style>
+
+<div class="be-wrap">
+
+  {# ── Sticky token counter ── #}
+  <div class="be-token-bar">
+    <div>
+      <div class="be-token-label">Tokens Remaining</div>
+      <div class="be-token-count" id="token-display">20</div>
+    </div>
+    <div class="be-panel-label">
+      <div id="panel-title-bar">Human Wealth Manager</div>
+      <div class="be-panel-sub">Step 1 of 2</div>
+    </div>
+  </div>
+
+  <form method="post" id="be-form">
+
+    {# ── Hidden inputs — oTree reads these on submit ── #}
+    <input type="hidden" name="h_bin1" id="id_h_bin1" value="0">
+    <input type="hidden" name="h_bin2" id="id_h_bin2" value="0">
+    <input type="hidden" name="h_bin3" id="id_h_bin3" value="0">
+    <input type="hidden" name="h_bin4" id="id_h_bin4" value="0">
+    <input type="hidden" name="h_bin5" id="id_h_bin5" value="0">
+    <input type="hidden" name="h_bin6" id="id_h_bin6" value="0">
+    <input type="hidden" name="h_bin7" id="id_h_bin7" value="0">
+    <input type="hidden" name="a_bin1" id="id_a_bin1" value="0">
+    <input type="hidden" name="a_bin2" id="id_a_bin2" value="0">
+    <input type="hidden" name="a_bin3" id="id_a_bin3" value="0">
+    <input type="hidden" name="a_bin4" id="id_a_bin4" value="0">
+    <input type="hidden" name="a_bin5" id="id_a_bin5" value="0">
+    <input type="hidden" name="a_bin6" id="id_a_bin6" value="0">
+    <input type="hidden" name="a_bin7" id="id_a_bin7" value="0">
+
+    {# ══════════════════════════════════════════════
+       PANEL 1 — Human Wealth Manager
+    ══════════════════════════════════════════════ #}
+    <div id="panel-human">
+      <div class="be-prompt">
+        <h2>Human Wealth Manager</h2>
+        <p>
+          Using your 20 tokens, indicate how likely you think it is that a
+          <strong>Human Wealth Manager</strong> will achieve each annual return range
+          for your portfolio. Place more tokens in ranges you think are more likely.
+        </p>
+      </div>
+
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <div class="be-grid" id="grid-human">
+            {% for label in bin_labels %}
+            <div class="be-bin" id="hbin-col-{{ forloop.counter }}">
+              <div class="be-bin-label">{{ label }}</div>
+              <div class="be-bar-wrap">
+                <div class="be-bar" id="hbar-{{ forloop.counter }}"></div>
+              </div>
+              <div class="be-count" id="hcount-{{ forloop.counter }}">0</div>
+              <div class="be-btn-row">
+                <button type="button" class="be-btn"
+                        id="hminus-{{ forloop.counter }}"
+                        onclick="adjust('h', {{ forloop.counter }}, -1)">−</button>
+                <button type="button" class="be-btn"
+                        id="hplus-{{ forloop.counter }}"
+                        onclick="adjust('h', {{ forloop.counter }}, +1)">+</button>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <button type="button" class="be-action-btn" id="btn-continue"
+              disabled onclick="switchToAI()">
+        Continue to AI Advisor →
+      </button>
+    </div>
+
+    {# ══════════════════════════════════════════════
+       PANEL 2 — AI Advisor
+    ══════════════════════════════════════════════ #}
+    <div id="panel-ai" style="display:none">
+      <div class="be-prompt">
+        <h2>AI Advisor</h2>
+        <p>
+          Now repeat the exercise for the <strong>AI Advisor</strong>.
+          Place your 20 tokens across the return ranges based on what you expect
+          an AI-driven portfolio to achieve.
+        </p>
+      </div>
+
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <div class="be-grid" id="grid-ai">
+            {% for label in bin_labels %}
+            <div class="be-bin" id="abin-col-{{ forloop.counter }}">
+              <div class="be-bin-label">{{ label }}</div>
+              <div class="be-bar-wrap">
+                <div class="be-bar" id="abar-{{ forloop.counter }}"
+                     style="background:#7c3aed"></div>
+              </div>
+              <div class="be-count" id="acount-{{ forloop.counter }}">0</div>
+              <div class="be-btn-row">
+                <button type="button" class="be-btn"
+                        id="aminus-{{ forloop.counter }}"
+                        onclick="adjust('a', {{ forloop.counter }}, -1)">−</button>
+                <button type="button" class="be-btn"
+                        id="aplus-{{ forloop.counter }}"
+                        onclick="adjust('a', {{ forloop.counter }}, +1)">+</button>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="be-action-btn" id="btn-submit" disabled>
+        Submit Beliefs
+      </button>
+    </div>
+
+  </form>
+
+  <p class="be-footnote">
+    Your beliefs may be used to determine a bonus payment at the end of the study.
+  </p>
+</div>
+
+<script>
+  var TOTAL   = {{ total_tokens }};   // 20
+  var N_BINS  = 7;
+
+  /* State: separate arrays for human (h) and AI (a) panels */
+  var state = {
+    h: [0, 0, 0, 0, 0, 0, 0],
+    a: [0, 0, 0, 0, 0, 0, 0],
+  };
+
+  /* ── Core adjust function ── */
+  function adjust(panel, binNum, delta) {
+    var idx      = binNum - 1;
+    var bins     = state[panel];
+    var newVal   = bins[idx] + delta;
+    var usedOther = bins.reduce(function(s, v, i) { return i !== idx ? s + v : s; }, 0);
+    var remaining = TOTAL - usedOther;
+
+    /* Clamp */
+    newVal = Math.max(0, Math.min(newVal, remaining));
+    bins[idx] = newVal;
+
+    renderPanel(panel);
+  }
+
+  /* ── Render one panel's UI ── */
+  function renderPanel(panel) {
+    var bins  = state[panel];
+    var total = bins.reduce(function(a, b) { return a + b; }, 0);
+    var remaining = TOTAL - total;
+
+    bins.forEach(function(v, i) {
+      var n = i + 1;
+      /* Bar height as % of container */
+      document.getElementById(panel + 'bar-'   + n).style.height = (v / TOTAL * 100) + '%';
+      /* Count label */
+      document.getElementById(panel + 'count-' + n).textContent = v;
+      /* Column highlight */
+      var col = document.getElementById(panel + 'bin-col-' + n);
+      col.classList.toggle('has-tokens', v > 0);
+      /* Minus button */
+      document.getElementById(panel + 'minus-' + n).disabled = (v === 0);
+      /* Plus button — disabled when no tokens remain */
+      document.getElementById(panel + 'plus-'  + n).disabled = (remaining === 0);
+    });
+
+    /* Token counter */
+    var countEl = document.getElementById('token-display');
+    countEl.textContent = remaining;
+    countEl.className   = 'be-token-count' + (remaining === 0 ? ' zero' : remaining <= 5 ? ' warn' : '');
+
+    /* Save values to hidden inputs */
+    bins.forEach(function(v, i) {
+      document.getElementById('id_' + panel + '_bin' + (i + 1)).value = v;
+    });
+
+    /* Enable action button only when exactly 0 remaining */
+    if (panel === 'h') {
+      document.getElementById('btn-continue').disabled = (remaining !== 0);
+    } else {
+      document.getElementById('btn-submit').disabled = (remaining !== 0);
+    }
+  }
+
+  /* ── Switch from Human panel to AI panel ── */
+  function switchToAI() {
+    /* Hide human panel */
+    document.getElementById('panel-human').style.display = 'none';
+    /* Show AI panel */
+    document.getElementById('panel-ai').style.display = 'block';
+    /* Update sticky header */
+    document.getElementById('panel-title-bar').textContent = 'AI Advisor';
+    document.querySelector('.be-panel-sub').textContent = 'Step 2 of 2';
+    /* Reset token counter display for AI */
+    renderPanel('a');
+    /* Scroll to top */
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  /* ── Initialise both panels on load ── */
+  renderPanel('h');
+  renderPanel('a');
+</script>
+
+{% endblock %}
