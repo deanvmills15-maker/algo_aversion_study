@@ -75,9 +75,12 @@
 
   .be-prompt p {
     font-size: .875rem;
+    font-weight: 400;
+    font-style: normal;
     color: #64748b;
     line-height: 1.6;
     margin: 0;
+    /* Identical rendering guaranteed — only the bolded name changes */
   }
 
   /* ── Bin grid ── */
@@ -255,11 +258,9 @@
     <div id="panel-human">
       <div class="be-prompt">
         <h2>Human Wealth Manager</h2>
-        <p>
-          Using your 20 tokens, indicate how likely you think it is that the portfolio
-          recommended by the <strong>Human Wealth Manager</strong> will achieve each
-          annual return range. Place more tokens in ranges you think are more likely.
-        </p>
+        <p>Using your 20 tokens, indicate how likely you think it is that the portfolio
+        recommended by a <strong>Human Wealth Manager</strong> will achieve each annual
+        return range. Place more tokens in ranges you think are more likely.</p>
       </div>
 
       <div class="card shadow-sm">
@@ -298,11 +299,9 @@
     <div id="panel-ai" style="display:none">
       <div class="be-prompt">
         <h2>AI Advisor</h2>
-        <p>
-          Using your 20 tokens, indicate how likely you think it is that the portfolio
-          recommended by the <strong>AI Advisor</strong> will achieve each annual
-          return range. Place more tokens in ranges you think are more likely.
-        </p>
+        <p>Using your 20 tokens, indicate how likely you think it is that the portfolio
+        recommended by an <strong>AI Advisor</strong> will achieve each annual
+        return range. Place more tokens in ranges you think are more likely.</p>
       </div>
 
       <div class="card shadow-sm">
