@@ -132,10 +132,10 @@
   <div class="text-center">
     <span class="vt-stage-badge">Round {{ player.round_number }} of 5</span>
     <h2>Investment Advice Valuation</h2>
-    <div class="vt-advisor-label">Advisor: {{ advisor_type }}</div>
+    <div class="vt-advisor-label">{{ advisor_type }}</div>
     <p class="vt-sub">
-      For each fee listed, choose whether you prefer to manage your portfolio
-      yourself (Option A) or pay for {{ advisor_type }} advice (Option B).
+      For each row, would you rather manage your portfolio yourself, or pay
+      the listed fee to have the {{ advisor_type }} manage it for you?
     </p>
   </div>
 
@@ -145,21 +145,38 @@
       <div class="card-body p-0">
         <table class="table table-hover vt-table mb-0">
           <colgroup>
-            <col style="width: 34%">
-            <col style="width: 33%">
-            <col style="width: 33%">
+            <col style="width: 40%">
+            <col style="width: 30%">
+            <col style="width: 30%">
           </colgroup>
           <thead>
             <tr>
-              <th>Investment Fee</th>
-              <th>Option A — Self-Managed</th>
-              <th>Option B — {{ advisor_type }}</th>
+              <th style="text-align:left; padding-left:1.25rem">Advisory Fee</th>
+              <th>
+                Option A<br>
+                <span style="font-size:.68rem; font-weight:500; letter-spacing:.02em;
+                             text-transform:none; color:#94a3b8;">
+                  Manage your portfolio yourself
+                </span>
+              </th>
+              <th>
+                Option B<br>
+                <span style="font-size:.68rem; font-weight:500; letter-spacing:.02em;
+                             text-transform:none; color:#93c5fd;">
+                  Have {{ advisor_type }} manage your portfolio
+                </span>
+              </th>
             </tr>
           </thead>
           <tbody>
             {% for price in prices %}
             <tr data-price="{{ price }}">
-              <td class="fw-semibold">${{ price }}</td>
+              <td style="text-align:left; padding-left:1.25rem;">
+                <span class="fw-semibold">Pay ${{ price }}</span>
+                <span style="font-size:.8rem; color:#94a3b8; margin-left:.4rem;">
+                  for {{ advisor_type }}
+                </span>
+              </td>
               <td>
                 <input class="vt-radio"
                        type="radio"
