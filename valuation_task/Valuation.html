@@ -1,12 +1,12 @@
-{% block title %}Valuation Task{% endblock %}
+{% block title %}Advisor Valuation{% endblock %}
 
 {% block content %}
 
 <style>
   body { background: #f8f9fb; }
 
-  .vt-card {
-    max-width: 660px;
+  .vt-wrap {
+    max-width: 860px;
     margin: 2.5rem auto;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   }
@@ -24,7 +24,7 @@
     margin-bottom: .75rem;
   }
 
-  .vt-card h2 {
+  .vt-wrap h2 {
     font-size: 1.45rem;
     font-weight: 700;
     color: #0f172a;
@@ -44,63 +44,172 @@
     margin-bottom: 1rem;
   }
 
-  .vt-sub {
-    font-size: .9rem;
-    color: #64748b;
-    line-height: 1.6;
-    margin: 0 0 1.25rem;
+  .vt-instructions {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    margin: 0 0 1.5rem;
+    text-align: left;
   }
 
-  /* Table header */
+  .vt-inst-lead {
+    font-size: .875rem;
+    color: #334155;
+    line-height: 1.6;
+    margin: 0 0 .75rem;
+  }
+
+  .vt-inst-list {
+    margin: 0;
+    padding-left: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: .45rem;
+  }
+
+  .vt-inst-list li {
+    font-size: .83rem;
+    color: #475569;
+    line-height: 1.55;
+  }
+
+  /* ── Table ── */
+  .vt-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
   .vt-table thead th {
     background: #0f172a;
     color: #fff;
-    font-size: .78rem;
+    font-size: .72rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: .06em;
-    border: none;
-    padding: .85rem 1rem;
+    letter-spacing: .07em;
+    padding: .9rem 1rem;
     text-align: center;
-    white-space: nowrap;
+    vertical-align: middle;
   }
 
-  .vt-table tbody tr { cursor: pointer; }
-  /* B (advisor) rows: clean white — the default/preferred state */
-  .vt-table tbody tr.vt-row-b { background-color: #ffffff !important; }
-  /* A (self-managed) rows: muted grey — visually "inactive" */
-  .vt-table tbody tr.vt-row-a { background-color: #f1f5f9 !important; color: #94a3b8; }
+  .vt-table tbody tr {
+    border-bottom: 1px solid #f1f5f9;
+    transition: background .15s;
+  }
 
-  .vt-table tbody td {
-    color: #1e293b;
+  .vt-table tbody tr:last-child { border-bottom: none; }
+
+  /* ── Column 1: Would you rather ── */
+  .col-question {
+    width: 14%;
+    text-align: center;
+    padding: .8rem .75rem;
+    font-size: .75rem;
+    font-style: italic;
+    color: #94a3b8;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+
+  /* ── Column 2: Keep ── */
+  .col-keep {
+    width: 30%;
+    text-align: center;
+    padding: .8rem 1rem;
+    font-size: .88rem;
     font-weight: 500;
-    font-size: .95rem;
-    padding: .75rem 1rem;
+    color: #94a3b8;
     vertical-align: middle;
+    border-radius: 0;
+    transition: background .18s, color .18s;
+  }
+
+  .col-keep.is-selected {
+    background: #f1f5f9;
+    color: #334155;
+    font-weight: 700;
+  }
+
+  .col-keep.is-muted {
+    color: #d1d5db;
+  }
+
+  /* ── Column 3: Arrow toggles ── */
+  .col-arrows {
+    width: 12%;
     text-align: center;
-    white-space: nowrap;
-  }
-
-  /* Custom radio */
-  .vt-radio {
-    appearance: none;
-    -webkit-appearance: none;
-    width: 20px; height: 20px;
-    border: 2px solid #cbd5e1;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: all .15s;
-    display: inline-block;
+    padding: .6rem .5rem;
     vertical-align: middle;
   }
-  .vt-radio:hover   { border-color: #2563eb; }
-  .vt-radio:checked {
-    border-color: #2563eb;
-    background: #2563eb;
-    box-shadow: inset 0 0 0 3px #fff;
+
+  .arrow-pair {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    align-items: center;
   }
 
-  /* Submit */
+  .arrow-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1.5px solid #cbd5e1;
+    background: #f8fafc;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .15s;
+    color: #94a3b8;
+    padding: 0;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .arrow-btn:hover { border-color: #2563eb; color: #2563eb; background: #eff6ff; }
+
+  .arrow-btn.selected-keep {
+    background: #475569;
+    border-color: #475569;
+    color: #fff;
+  }
+
+  .arrow-btn.selected-replace {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #fff;
+  }
+
+  /* ── Column 4: Replace ── */
+  .col-replace {
+    width: 44%;
+    text-align: center;
+    padding: .8rem 1rem;
+    font-size: .88rem;
+    font-weight: 500;
+    color: #94a3b8;
+    vertical-align: middle;
+    transition: background .18s, color .18s;
+    line-height: 1.45;
+  }
+
+  .col-replace .replace-price {
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+
+  .col-replace.is-selected {
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-weight: 600;
+  }
+
+  .col-replace.is-muted {
+    color: #d1d5db;
+  }
+
+  /* ── Submit ── */
   #vt-submit {
     display: block;
     width: 100%;
@@ -113,85 +222,101 @@
     font-weight: 600;
     cursor: pointer;
     transition: all .2s;
-    margin-top: 1.25rem;
+    margin-top: 1.5rem;
     margin-bottom: .75rem;
   }
+
   #vt-submit:hover:not(:disabled) {
     background: #1d4ed8;
     box-shadow: 0 4px 12px rgba(37,99,235,.3);
     transform: translateY(-1px);
   }
-  #vt-submit:disabled { background: #94a3b8; cursor: not-allowed; }
+
+  #vt-submit:disabled { background: #94a3b8; cursor: not-allowed; transform: none; box-shadow: none; }
 
   .vt-footnote { text-align: center; font-size: .78rem; color: #94a3b8; }
 
   .otree-btn-next { display: none !important; }
 </style>
 
-<div class="vt-card">
+<div class="vt-wrap">
   <div class="text-center">
     <span class="vt-stage-badge">Valuation {{ advisor_num }} of 2</span>
     <h2>Investment Advice Valuation</h2>
     <div class="vt-advisor-label">{{ advisor_type }}</div>
-    <p class="vt-sub">
-      For each row, would you rather manage your portfolio yourself, or pay
-      the listed fee to have the {{ advisor_type }} manage it for you?
-    </p>
+    <div class="vt-instructions">
+      <p class="vt-inst-lead">
+        Each row below presents a choice between two options at a specific advisory fee.
+        Work through the rows and use the arrows to record your honest preference for each fee level.
+      </p>
+      <ul class="vt-inst-list">
+        <li>
+          <strong>Keep your portfolio</strong> — You retain the portfolio you constructed
+          in the previous section. This portfolio contributes to your participation payout
+          based on its simulated performance.
+        </li>
+        <li>
+          <strong>Replace your portfolio</strong> — Your portfolio is replaced by one managed
+          by the <strong>{{ advisor_type }}</strong>, and you pay the listed fee out of
+          your participation earnings. The advisor's portfolio then contributes to your payout instead.
+          The {{ advisor_type }}'s portfolio has been constructed using the risk preferences
+          you revealed in the investment option assessment at the start of the study.
+        </li>
+        <li>
+          <strong>How the arrows work</strong> — Click <strong>→</strong> on a row if you
+          would be willing to pay that fee for the {{ advisor_type }}'s portfolio.
+          Click <strong>←</strong> if you would prefer to keep your own portfolio at that fee.
+          Rows above and below will update automatically to keep your choices consistent.
+        </li>
+        <li>
+          There are no right or wrong answers — please respond based on your genuine preferences.
+        </li>
+      </ul>
+    </div>
   </div>
 
   <form method="post" id="vt-form">
-
     <div class="card shadow-sm">
       <div class="card-body p-0">
-        <table class="table table-hover vt-table mb-0">
+        <table class="vt-table">
           <colgroup>
-            <col style="width: 40%">
-            <col style="width: 30%">
-            <col style="width: 30%">
+            <col style="width:14%">
+            <col style="width:30%">
+            <col style="width:12%">
+            <col style="width:44%">
           </colgroup>
           <thead>
             <tr>
-              <th style="text-align:left; padding-left:1.25rem">Advisory Fee</th>
-              <th>
-                Option A<br>
-                <span style="font-size:.68rem; font-weight:500; letter-spacing:.02em;
-                             text-transform:none; color:#94a3b8;">
-                  Manage your portfolio yourself
-                </span>
-              </th>
-              <th>
-                Option B<br>
-                <span style="font-size:.68rem; font-weight:500; letter-spacing:.02em;
-                             text-transform:none; color:#93c5fd;">
-                  Have {{ advisor_type }} manage your portfolio
-                </span>
-              </th>
+              <th></th>
+              <th>Keep Your Portfolio</th>
+              <th></th>
+              <th>Replace Your Portfolio</th>
             </tr>
           </thead>
           <tbody>
             {% for price in prices %}
-            <tr data-price="{{ price }}">
-              <td style="text-align:left; padding-left:1.25rem;">
-                <span class="fw-semibold">Pay ${{ price }}</span>
-                <span style="font-size:.8rem; color:#94a3b8; margin-left:.4rem;">
-                  for {{ advisor_type }}
-                </span>
+            <tr id="row-{{ price }}">
+              <td class="col-question">Would you<br>rather…</td>
+              <td class="col-keep" id="keep-{{ price }}">
+                Keep your portfolio
               </td>
-              <td>
-                <input class="vt-radio"
-                       type="radio"
-                       name="row_{{ price }}"
-                       id="a_{{ price }}"
-                       value="A"
-                       onchange="handleChoice('A', {{ price }})">
+              <td class="col-arrows">
+                <div class="arrow-pair">
+                  <button type="button"
+                          class="arrow-btn"
+                          id="left-{{ price }}"
+                          onclick="chooseKeep({{ price }})"
+                          title="Keep your portfolio">&#8592;</button>
+                  <button type="button"
+                          class="arrow-btn"
+                          id="right-{{ price }}"
+                          onclick="chooseReplace({{ price }})"
+                          title="Replace with {{ advisor_type }}">&#8594;</button>
+                </div>
               </td>
-              <td>
-                <input class="vt-radio"
-                       type="radio"
-                       name="row_{{ price }}"
-                       id="b_{{ price }}"
-                       value="B"
-                       onchange="handleChoice('B', {{ price }})">
+              <td class="col-replace" id="replace-{{ price }}">
+                Replace with <strong>{{ advisor_type }}</strong> portfolio
+                and pay <span class="replace-price">${{ price }}</span>
               </td>
             </tr>
             {% endfor %}
@@ -200,52 +325,60 @@
       </div>
     </div>
 
-    {# Hidden field oTree reads for switch_point #}
     <input type="hidden" name="{{ field_name }}" id="switch_point_input" value="">
-
-    <button type="submit" id="vt-submit">Confirm &amp; Continue</button>
+    <button type="submit" id="vt-submit" disabled>Confirm &amp; Continue</button>
   </form>
 
-  <p class="vt-footnote">Your responses may be used to determine your final payment.</p>
+  <p class="vt-footnote">Your response may be used to determine your final payment.</p>
 </div>
 
 <script>
-  var PRICES = {{ prices }};
+  var PRICES      = {{ prices }};
+  var switchPoint = null;   /* null = no selection yet */
 
-  /*
-   * setSwitchPoint(sp):
-   *   Prices 1..sp  → Option B (Advisor)   — white rows
-   *   Prices sp+1..10 → Option A (Self-managed) — grey rows
-   *   switch_point = sp (highest price willing to pay; 0 = never)
-   */
-  function setSwitchPoint(sp) {
+  function applyState() {
     PRICES.forEach(function(p) {
-      var isB = (p <= sp);
-      document.getElementById('b_' + p).checked =  isB;
-      document.getElementById('a_' + p).checked = !isB;
-      var row = document.querySelector('tr[data-price="' + p + '"]');
-      if (row) {
-        row.classList.toggle('vt-row-b',  isB);
-        row.classList.toggle('vt-row-a', !isB);
+      var keepCell    = document.getElementById('keep-'    + p);
+      var replaceCell = document.getElementById('replace-' + p);
+      var leftBtn     = document.getElementById('left-'    + p);
+      var rightBtn    = document.getElementById('right-'   + p);
+
+      keepCell.classList.remove('is-selected', 'is-muted');
+      replaceCell.classList.remove('is-selected', 'is-muted');
+      leftBtn.classList.remove('selected-keep', 'selected-replace');
+      rightBtn.classList.remove('selected-keep', 'selected-replace');
+
+      if (switchPoint === null) return;   /* leave everything neutral */
+
+      if (p <= switchPoint) {
+        /* Replace selected for this row */
+        replaceCell.classList.add('is-selected');
+        keepCell.classList.add('is-muted');
+        rightBtn.classList.add('selected-replace');
+      } else {
+        /* Keep selected for this row */
+        keepCell.classList.add('is-selected');
+        replaceCell.classList.add('is-muted');
+        leftBtn.classList.add('selected-keep');
       }
     });
-    document.getElementById('switch_point_input').value = sp;
+
+    document.getElementById('switch_point_input').value =
+      switchPoint !== null ? switchPoint : '';
+    document.getElementById('vt-submit').disabled = (switchPoint === null);
   }
 
-  function handleChoice(choice, clickedPrice) {
-    if (choice === 'A') {
-      // Switching OFF at this price: last willing price = clickedPrice - 1
-      setSwitchPoint(clickedPrice - 1);
-    } else {
-      // Switching back ON at this price: willing up to clickedPrice
-      setSwitchPoint(clickedPrice);
-    }
+  /* Click → on row $p: willing to pay up to $p */
+  function chooseReplace(price) {
+    switchPoint = price;
+    applyState();
   }
 
-  // Initialise: all rows pre-selected as B (Advisor), switch_point = 10
-  document.addEventListener('DOMContentLoaded', function () {
-    setSwitchPoint(10);
-  });
+  /* Click ← on row $p: last willing price was $p−1 */
+  function chooseKeep(price) {
+    switchPoint = price - 1;
+    applyState();
+  }
 </script>
 
 {% endblock %}
