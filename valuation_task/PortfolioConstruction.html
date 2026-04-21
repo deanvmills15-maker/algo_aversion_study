@@ -13,7 +13,6 @@
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   }
 
-  /* ── Header ── */
   .pc-stage-badge {
     display: inline-block;
     background: #eff6ff;
@@ -42,9 +41,49 @@
     margin: 0 0 1.5rem;
   }
 
+  /* ── Two-column slider layout ── */
+  .slider-area {
+    display: grid;
+    /* col 1: asset controls+slider | col 2: fixed-width distribution column */
+    grid-template-columns: 1fr 96px;
+    gap: 0 .75rem;
+  }
+
+  .slider-rows { }
+
+  /* Distribution column — sits to the right of all sliders as one aligned column */
+  .dist-col {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    padding-top: .25rem;   /* visual nudge to center with asset-top rows */
+  }
+
+  .dist-unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    width: 88px;
+    height: 54px;           /* fixed height so all 5 are equally spaced */
+    justify-content: flex-end;
+  }
+
+  .dist-unit canvas { display: block; }
+
+  .dist-return {
+    font-size: .62rem;
+    font-weight: 600;
+    color: #475569;
+    text-align: center;
+    white-space: nowrap;
+    line-height: 1.2;
+  }
+
   /* ── Asset rows ── */
   .asset-row {
-    padding: .65rem 0;
+    padding: .55rem 0;
     border-bottom: 1px solid #f1f5f9;
   }
   .asset-row:last-child { border-bottom: none; }
@@ -53,36 +92,28 @@
     display: flex;
     align-items: center;
     gap: .5rem;
-    margin-bottom: .35rem;
+    margin-bottom: .3rem;
   }
 
-  /* Lock toggle */
   .lock-checkbox { display: none; }
 
   .lock-btn {
     cursor: pointer;
-    width: 26px;
-    height: 26px;
+    width: 26px; height: 26px;
     border-radius: 6px;
     border: 1.5px solid #e2e8f0;
     background: #f8fafc;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     font-size: .85rem;
     transition: all .15s;
     flex-shrink: 0;
     user-select: none;
   }
   .lock-btn:hover { border-color: #94a3b8; }
-  .lock-checkbox:checked + .lock-btn {
-    background: #fef9c3;
-    border-color: #ca8a04;
-  }
+  .lock-checkbox:checked + .lock-btn { background: #fef9c3; border-color: #ca8a04; }
 
   .asset-dot {
-    width: 11px;
-    height: 11px;
+    width: 11px; height: 11px;
     border-radius: 50%;
     flex-shrink: 0;
   }
@@ -94,35 +125,21 @@
     flex: 1;
   }
 
-  .return-chip {
-    font-size: .72rem;
-    font-weight: 500;
-    padding: .15rem .55rem;
-    border-radius: 4px;
-    background: #f1f5f9;
-    color: #475569;
-    white-space: nowrap;
-  }
-
   .alloc-pct {
     font-size: .9rem;
     font-weight: 700;
     color: #0f172a;
-    min-width: 40px;
+    min-width: 38px;
     text-align: right;
   }
 
-  /* Range slider */
   .pc-slider {
     width: 100%;
     accent-color: #2563eb;
     cursor: pointer;
     transition: opacity .2s;
   }
-  .pc-slider:disabled {
-    opacity: .35;
-    cursor: not-allowed;
-  }
+  .pc-slider:disabled { opacity: .35; cursor: not-allowed; }
 
   /* ── Right panel ── */
   .chart-panel {
@@ -133,13 +150,8 @@
     padding-left: .5rem;
   }
 
-  .chart-wrap {
-    width: 210px;
-    height: 210px;
-    flex-shrink: 0;
-  }
+  .chart-wrap { width: 210px; height: 210px; flex-shrink: 0; }
 
-  /* Portfolio summary box */
   .pc-summary {
     width: 100%;
     background: #f8fafc;
@@ -167,60 +179,28 @@
   }
   .pc-stat:last-child { margin-bottom: 0; }
 
-  .pc-stat-val {
-    font-weight: 700;
-    font-size: 1rem;
-    color: #0f172a;
-  }
+  .pc-stat-val { font-weight: 700; font-size: 1rem; color: #0f172a; }
+  .total-ok    { color: #15803d !important; }
+  .total-warn  { color: #b91c1c !important; }
 
-  .total-ok   { color: #15803d !important; }
-  .total-warn { color: #b91c1c !important; }
-
-  /* Legend */
-  .chart-legend {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: .3rem;
-  }
+  .chart-legend { width: 100%; display: flex; flex-direction: column; gap: .3rem; }
 
   .legend-row {
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-    font-size: .8rem;
-    color: #334155;
+    display: flex; align-items: center; gap: .5rem;
+    font-size: .8rem; color: #334155;
   }
 
-  .legend-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 
-  .legend-pct {
-    margin-left: auto;
-    font-weight: 700;
-    color: #0f172a;
-    font-size: .8rem;
-  }
+  .legend-pct { margin-left: auto; font-weight: 700; color: #0f172a; font-size: .8rem; }
 
-  /* ── Submit ── */
   #port-submit {
-    display: block;
-    width: 100%;
-    background: #2563eb;
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    padding: .85rem;
-    font-size: .95rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all .2s;
-    margin-top: 1.5rem;
-    margin-bottom: .5rem;
+    display: block; width: 100%;
+    background: #2563eb; color: #fff; border: none;
+    border-radius: 10px; padding: .85rem;
+    font-size: .95rem; font-weight: 600;
+    cursor: pointer; transition: all .2s;
+    margin-top: 1.5rem; margin-bottom: .5rem;
   }
   #port-submit:hover:not(:disabled) {
     background: #1d4ed8;
@@ -230,7 +210,6 @@
   #port-submit:disabled { background: #94a3b8; cursor: not-allowed; }
 
   .pc-footnote { text-align: center; font-size: .78rem; color: #94a3b8; }
-
   .otree-btn-next { display: none !important; }
 </style>
 
@@ -244,7 +223,6 @@
     </p>
   </div>
 
-  {# Debug: show backend validation errors if any #}
   {% if form.errors %}
     <div class="alert alert-danger mb-3">
       <strong>Form errors:</strong> {{ form.errors }}
@@ -252,7 +230,6 @@
   {% endif %}
 
   <form method="post" id="port-form">
-    {# Hidden inputs — these are what oTree reads on submit #}
     <input type="hidden" name="alloc_tbills"  id="id_alloc_tbills"  value="20">
     <input type="hidden" name="alloc_index"   id="id_alloc_index"   value="20">
     <input type="hidden" name="alloc_reits"   id="id_alloc_reits"   value="20">
@@ -263,92 +240,98 @@
       <div class="card-body">
         <div class="row g-0">
 
-          {# ── Left: Sliders ── #}
+          {# ── Left: Sliders + Distribution column ── #}
           <div class="col-md-7 pe-md-4">
+            <div class="slider-area">
 
-            {% comment %}T-Bills{% endcomment %}
-            <div class="asset-row">
-              <div class="asset-top">
-                <input type="checkbox" class="lock-checkbox" id="lock-tbills"
-                       onchange="toggleLock('tbills')">
-                <label class="lock-btn" for="lock-tbills" title="Lock allocation">🔒</label>
-                <span class="asset-dot" style="background:#0072B2"></span>
-                <span class="asset-name">T-Bills</span>
-                <span class="return-chip">4% Expected Return</span>
-                <span class="alloc-pct" id="label-tbills">20%</span>
+              {# Slider rows #}
+              <div class="slider-rows">
+
+                <div class="asset-row">
+                  <div class="asset-top">
+                    <input type="checkbox" class="lock-checkbox" id="lock-tbills" onchange="toggleLock('tbills')">
+                    <label class="lock-btn" for="lock-tbills" title="Lock allocation">🔒</label>
+                    <span class="asset-dot" style="background:#0072B2"></span>
+                    <span class="asset-name">T-Bills</span>
+                    <span class="alloc-pct" id="label-tbills">20%</span>
+                  </div>
+                  <input type="range" class="pc-slider" min="0" max="100" step="1" id="range-tbills" value="20" oninput="onSlide('tbills')">
+                </div>
+
+                <div class="asset-row">
+                  <div class="asset-top">
+                    <input type="checkbox" class="lock-checkbox" id="lock-index" onchange="toggleLock('index')">
+                    <label class="lock-btn" for="lock-index" title="Lock allocation">🔒</label>
+                    <span class="asset-dot" style="background:#E69F00"></span>
+                    <span class="asset-name">Index Funds</span>
+                    <span class="alloc-pct" id="label-index">20%</span>
+                  </div>
+                  <input type="range" class="pc-slider" min="0" max="100" step="1" id="range-index" value="20" oninput="onSlide('index')">
+                </div>
+
+                <div class="asset-row">
+                  <div class="asset-top">
+                    <input type="checkbox" class="lock-checkbox" id="lock-reits" onchange="toggleLock('reits')">
+                    <label class="lock-btn" for="lock-reits" title="Lock allocation">🔒</label>
+                    <span class="asset-dot" style="background:#009E73"></span>
+                    <span class="asset-name">REITs</span>
+                    <span class="alloc-pct" id="label-reits">20%</span>
+                  </div>
+                  <input type="range" class="pc-slider" min="0" max="100" step="1" id="range-reits" value="20" oninput="onSlide('reits')">
+                </div>
+
+                <div class="asset-row">
+                  <div class="asset-top">
+                    <input type="checkbox" class="lock-checkbox" id="lock-stocks" onchange="toggleLock('stocks')">
+                    <label class="lock-btn" for="lock-stocks" title="Lock allocation">🔒</label>
+                    <span class="asset-dot" style="background:#CC79A7"></span>
+                    <span class="asset-name">Common Stocks</span>
+                    <span class="alloc-pct" id="label-stocks">20%</span>
+                  </div>
+                  <input type="range" class="pc-slider" min="0" max="100" step="1" id="range-stocks" value="20" oninput="onSlide('stocks')">
+                </div>
+
+                <div class="asset-row">
+                  <div class="asset-top">
+                    <input type="checkbox" class="lock-checkbox" id="lock-crypto" onchange="toggleLock('crypto')">
+                    <label class="lock-btn" for="lock-crypto" title="Lock allocation">🔒</label>
+                    <span class="asset-dot" style="background:#F0E442; border:1px solid #d4c800"></span>
+                    <span class="asset-name">Cryptocurrency</span>
+                    <span class="alloc-pct" id="label-crypto">20%</span>
+                  </div>
+                  <input type="range" class="pc-slider" min="0" max="100" step="1" id="range-crypto" value="20" oninput="onSlide('crypto')">
+                </div>
+
+              </div>{# end slider-rows #}
+
+              {# Distribution column — one aligned column of sparklines #}
+              <div class="dist-col">
+                <div class="dist-unit">
+                  <canvas id="spark-tbills" width="88" height="36"></canvas>
+                  <span class="dist-return">Expected: 4%</span>
+                </div>
+                <div class="dist-unit">
+                  <canvas id="spark-index" width="88" height="36"></canvas>
+                  <span class="dist-return">Expected: 8%</span>
+                </div>
+                <div class="dist-unit">
+                  <canvas id="spark-reits" width="88" height="36"></canvas>
+                  <span class="dist-return">Expected: 7%</span>
+                </div>
+                <div class="dist-unit">
+                  <canvas id="spark-stocks" width="88" height="36"></canvas>
+                  <span class="dist-return">Expected: 12%</span>
+                </div>
+                <div class="dist-unit">
+                  <canvas id="spark-crypto" width="88" height="36"></canvas>
+                  <span class="dist-return">Expected: ±40%</span>
+                </div>
               </div>
-              <input type="range" class="pc-slider" min="0" max="100" step="1"
-                     id="range-tbills" value="20"
-                     oninput="onSlide('tbills')">
-            </div>
 
-            {% comment %}Index Funds{% endcomment %}
-            <div class="asset-row">
-              <div class="asset-top">
-                <input type="checkbox" class="lock-checkbox" id="lock-index"
-                       onchange="toggleLock('index')">
-                <label class="lock-btn" for="lock-index" title="Lock allocation">🔒</label>
-                <span class="asset-dot" style="background:#E69F00"></span>
-                <span class="asset-name">Index Funds</span>
-                <span class="return-chip">8% Expected Return</span>
-                <span class="alloc-pct" id="label-index">20%</span>
-              </div>
-              <input type="range" class="pc-slider" min="0" max="100" step="1"
-                     id="range-index" value="20"
-                     oninput="onSlide('index')">
-            </div>
-
-            {% comment %}REITs{% endcomment %}
-            <div class="asset-row">
-              <div class="asset-top">
-                <input type="checkbox" class="lock-checkbox" id="lock-reits"
-                       onchange="toggleLock('reits')">
-                <label class="lock-btn" for="lock-reits" title="Lock allocation">🔒</label>
-                <span class="asset-dot" style="background:#009E73"></span>
-                <span class="asset-name">REITs</span>
-                <span class="return-chip">7% Expected Return</span>
-                <span class="alloc-pct" id="label-reits">20%</span>
-              </div>
-              <input type="range" class="pc-slider" min="0" max="100" step="1"
-                     id="range-reits" value="20"
-                     oninput="onSlide('reits')">
-            </div>
-
-            {% comment %}Common Stocks{% endcomment %}
-            <div class="asset-row">
-              <div class="asset-top">
-                <input type="checkbox" class="lock-checkbox" id="lock-stocks"
-                       onchange="toggleLock('stocks')">
-                <label class="lock-btn" for="lock-stocks" title="Lock allocation">🔒</label>
-                <span class="asset-dot" style="background:#CC79A7"></span>
-                <span class="asset-name">Common Stocks</span>
-                <span class="return-chip">12% Expected Return</span>
-                <span class="alloc-pct" id="label-stocks">20%</span>
-              </div>
-              <input type="range" class="pc-slider" min="0" max="100" step="1"
-                     id="range-stocks" value="20"
-                     oninput="onSlide('stocks')">
-            </div>
-
-            {% comment %}Cryptocurrency{% endcomment %}
-            <div class="asset-row">
-              <div class="asset-top">
-                <input type="checkbox" class="lock-checkbox" id="lock-crypto"
-                       onchange="toggleLock('crypto')">
-                <label class="lock-btn" for="lock-crypto" title="Lock allocation">🔒</label>
-                <span class="asset-dot" style="background:#F0E442; border:1px solid #d4c800"></span>
-                <span class="asset-name">Cryptocurrency</span>
-                <span class="return-chip">±40% Return</span>
-                <span class="alloc-pct" id="label-crypto">20%</span>
-              </div>
-              <input type="range" class="pc-slider" min="0" max="100" step="1"
-                     id="range-crypto" value="20"
-                     oninput="onSlide('crypto')">
-            </div>
-
+            </div>{# end slider-area grid #}
           </div>{# end col-md-7 #}
 
-          {# ── Right: Chart + Summary ── #}
+          {# ── Right: Doughnut + Legend + Summary ── #}
           <div class="col-md-5 border-start ps-md-4 pt-3 pt-md-0">
             <div class="chart-panel">
 
@@ -356,41 +339,34 @@
                 <canvas id="portfolioChart"></canvas>
               </div>
 
-              {# Legend #}
               <div class="chart-legend">
                 <div class="legend-row">
-                  <span class="legend-dot" style="background:#0072B2"></span>
-                  T-Bills
+                  <span class="legend-dot" style="background:#0072B2"></span>T-Bills
                   <span class="legend-pct" id="lpct-tbills">20%</span>
                 </div>
                 <div class="legend-row">
-                  <span class="legend-dot" style="background:#E69F00"></span>
-                  Index Funds
+                  <span class="legend-dot" style="background:#E69F00"></span>Index Funds
                   <span class="legend-pct" id="lpct-index">20%</span>
                 </div>
                 <div class="legend-row">
-                  <span class="legend-dot" style="background:#009E73"></span>
-                  REITs
+                  <span class="legend-dot" style="background:#009E73"></span>REITs
                   <span class="legend-pct" id="lpct-reits">20%</span>
                 </div>
                 <div class="legend-row">
-                  <span class="legend-dot" style="background:#CC79A7"></span>
-                  Common Stocks
+                  <span class="legend-dot" style="background:#CC79A7"></span>Common Stocks
                   <span class="legend-pct" id="lpct-stocks">20%</span>
                 </div>
                 <div class="legend-row">
-                  <span class="legend-dot" style="background:#F0E442; border:1px solid #d4c800; border-radius:50%"></span>
-                  Cryptocurrency
+                  <span class="legend-dot" style="background:#F0E442; border:1px solid #d4c800; border-radius:50%"></span>Cryptocurrency
                   <span class="legend-pct" id="lpct-crypto">20%</span>
                 </div>
               </div>
 
-              {# Portfolio Summary #}
               <div class="pc-summary">
                 <div class="pc-summary-title">Portfolio Summary</div>
                 <div class="pc-stat">
-                  Weighted Avg. Return
-                  <span class="pc-stat-val" id="wtd-return">8.2%</span>
+                  Est. Return Range (±1σ)
+                  <span class="pc-stat-val" id="wtd-return">−4% to +22%</span>
                 </div>
                 <div class="pc-stat">
                   Total Allocated
@@ -399,11 +375,11 @@
               </div>
 
             </div>
-          </div>{# end col-md-5 #}
+          </div>
 
-        </div>{# end row #}
-      </div>{# end card-body #}
-    </div>{# end card #}
+        </div>
+      </div>
+    </div>
 
     <button type="submit" id="port-submit">Confirm Portfolio &amp; Continue</button>
   </form>
@@ -411,20 +387,146 @@
   <p class="text-center mt-1" style="font-size:.85rem; color:#475569;">
     Total: <strong><span id="plain-total" style="color:#15803d">100</span>%</strong>
   </p>
-
   <p class="pc-footnote">Your allocation will be recorded for the next stage of the study.</p>
 </div>
 
 <script>
+  /* ═══════════════════════════════════════════════════════
+     DISTRIBUTION SPARKLINES
+     All assets share the same x-axis [-55, 110] so widths
+     are visually comparable: T-Bills = narrow spike,
+     Crypto = wide flat curve. Peak-normalised so each is
+     visible, but the width difference conveys relative risk.
+  ═══════════════════════════════════════════════════════ */
+
+  var X_MIN = -55, X_MAX = 110, N_PTS = 120;
+
+  function normalPDF(x, mu, sigma) {
+    return Math.exp(-0.5 * Math.pow((x - mu) / sigma, 2));
+  }
+
+  var DIST = {
+    tbills: { mu: 4,  sigma: 2,  color: '#0072B2' },
+    index:  { mu: 8,  sigma: 12, color: '#E69F00' },
+    reits:  { mu: 7,  sigma: 18, color: '#009E73' },
+    stocks: { mu: 12, sigma: 28, color: '#CC79A7' },
+    crypto: { mu: 15, sigma: 55, color: '#9A7D0A' },
+  };
+
+  function makeDistData(key) {
+    var p    = DIST[key];
+    var step = (X_MAX - X_MIN) / (N_PTS - 1);
+    var pts  = [], raw = [];
+
+    for (var i = 0; i < N_PTS; i++) {
+      var x = X_MIN + i * step;
+      pts.push(i);
+      raw.push(normalPDF(x, p.mu, p.sigma));
+    }
+
+    var peak = Math.max.apply(null, raw);
+    return {
+      labels: pts,
+      values: raw.map(function(v) { return v / peak; }),
+    };
+  }
+
+  /* Index position of x=0 on the shared axis */
+  var ZERO_IDX = (0 - X_MIN) / (X_MAX - X_MIN) * (N_PTS - 1);
+
+  function drawSparkline(key) {
+    var p    = DIST[key];
+    var dist = makeDistData(key);
+    var hex  = p.color;
+    var r = parseInt(hex.slice(1,3),16);
+    var g = parseInt(hex.slice(3,5),16);
+    var b = parseInt(hex.slice(5,7),16);
+
+    /* Plugin: red loss-zone shading + dashed zero line */
+    var lossPlugin = {
+      id: 'loss_' + key,
+      beforeDatasetsDraw: function(chart) {
+        var ctx = chart.ctx;
+        var ca  = chart.chartArea;
+        var xs  = chart.scales.x;
+        var zx  = xs.getPixelForValue(ZERO_IDX);
+        var clippedZx = Math.max(ca.left, Math.min(zx, ca.right));
+
+        ctx.save();
+
+        /* red background for loss region */
+        ctx.fillStyle = 'rgba(220,38,38,0.10)';
+        ctx.fillRect(ca.left, ca.top, clippedZx - ca.left, ca.bottom - ca.top);
+
+        /* dashed zero-return divider */
+        if (zx > ca.left && zx < ca.right) {
+          ctx.strokeStyle = 'rgba(180,0,0,0.45)';
+          ctx.lineWidth = 0.8;
+          ctx.setLineDash([2, 2]);
+          ctx.beginPath();
+          ctx.moveTo(zx, ca.top);
+          ctx.lineTo(zx, ca.bottom);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+
+        ctx.restore();
+      }
+    };
+
+    new Chart(
+      document.getElementById('spark-' + key).getContext('2d'),
+      {
+        type: 'line',
+        plugins: [lossPlugin],
+        data: {
+          labels: dist.labels,
+          datasets: [{
+            data: dist.values,
+            borderColor:     'rgba('+r+','+g+','+b+',0.9)',
+            backgroundColor: 'rgba('+r+','+g+','+b+',0.18)',
+            borderWidth: 1.5,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 0,
+            pointHoverRadius: 0,
+          }]
+        },
+        options: {
+          animation: false,
+          responsive: false,
+          interaction: { mode: null },
+          plugins: {
+            legend:  { display: false },
+            tooltip: { enabled: false },
+          },
+          scales: {
+            x: { display: false },
+            y: { display: false, min: 0, max: 1.1 },
+          },
+          layout: { padding: 0 },
+        }
+      }
+    );
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    ['tbills', 'index', 'reits', 'stocks', 'crypto'].forEach(drawSparkline);
+  });
+
+  /* ═══════════════════════════════════════════════════════
+     PORTFOLIO DOUGHNUT + SLIDER LOGIC
+  ═══════════════════════════════════════════════════════ */
+
   var ASSETS  = ['tbills', 'index', 'reits', 'stocks', 'crypto'];
-  var RETURNS = [4, 8, 7, 12, 40];
+  var RETURNS = [4, 8, 7, 12, 15];   /* mu values — match DIST object */
+  var SIGMAS  = [2, 12, 18, 28, 55]; /* sigma values — match DIST object */
   var COLORS  = ['#0072B2', '#E69F00', '#009E73', '#CC79A7', '#F0E442'];
   var LABELS  = ['T-Bills', 'Index Funds', 'REITs', 'Common Stocks', 'Cryptocurrency'];
 
   var vals   = [20, 20, 20, 20, 20];
   var locked = [false, false, false, false, false];
 
-  /* ── Chart ── */
   var chart = new Chart(
     document.getElementById('portfolioChart').getContext('2d'),
     {
@@ -454,125 +556,92 @@
     }
   );
 
-  /* ── Lock toggle ── */
   function toggleLock(key) {
     var idx = ASSETS.indexOf(key);
     locked[idx] = document.getElementById('lock-' + key).checked;
     document.getElementById('range-' + key).disabled = locked[idx];
   }
 
-  /* ── Gap fixer: adjusts the largest unlocked asset so sum === 100 exactly ── */
   function fixGap() {
-    var sum = vals.reduce(function(a, b) { return a + b; }, 0);
-    var gap = 100 - sum;
+    var gap = 100 - vals.reduce(function(a, b) { return a + b; }, 0);
     if (gap === 0) return;
-
-    /* Find the largest unlocked asset to absorb the rounding gap */
-    var bestIdx = -1;
-    var bestVal = -1;
+    var bestIdx = -1, bestVal = -1;
     ASSETS.forEach(function(_, i) {
-      if (!locked[i] && vals[i] > bestVal) {
-        bestVal = vals[i];
-        bestIdx = i;
-      }
+      if (!locked[i] && vals[i] > bestVal) { bestVal = vals[i]; bestIdx = i; }
     });
-    if (bestIdx !== -1) {
-      vals[bestIdx] = Math.max(0, vals[bestIdx] + gap);
-    }
+    if (bestIdx !== -1) vals[bestIdx] = Math.max(0, vals[bestIdx] + gap);
   }
 
-  /* ── Slide handler ── */
   function onSlide(changedKey) {
     var idx    = ASSETS.indexOf(changedKey);
-    /* Ensure integer from the start */
     var newVal = Math.round(parseInt(document.getElementById('range-' + changedKey).value, 10));
-
-    /* Sum of locked assets (not the one being moved) */
     var lockedSum = ASSETS.reduce(function(s, _, i) {
       return s + (locked[i] && i !== idx ? vals[i] : 0);
     }, 0);
 
-    /* Clamp so locked assets are always honoured */
     newVal = Math.max(0, Math.min(newVal, 100 - lockedSum));
 
-    /* Unlocked others (not changedKey) */
-    var others = ASSETS
-      .map(function(_, i) { return i; })
-      .filter(function(i) { return i !== idx && !locked[i]; });
-
+    var others    = ASSETS.map(function(_, i) { return i; }).filter(function(i) { return i !== idx && !locked[i]; });
     var remaining = 100 - newVal - lockedSum;
     var otherSum  = others.reduce(function(s, i) { return s + vals[i]; }, 0);
 
     if (others.length === 0) {
-      /* All others locked — pin this slider to the only valid value */
       newVal = 100 - lockedSum;
       document.getElementById('range-' + changedKey).value = newVal;
     } else if (otherSum === 0) {
-      /* Others are all at 0 — spread remaining equally */
-      var base     = Math.floor(remaining / others.length);
+      var base = Math.floor(remaining / others.length);
       var leftover = remaining - base * others.length;
-      others.forEach(function(i, k) {
-        vals[i] = base + (k < leftover ? 1 : 0);
-      });
+      others.forEach(function(i, k) { vals[i] = base + (k < leftover ? 1 : 0); });
     } else {
-      /* Proportional scaling with largest-remainder rounding */
       var raw     = others.map(function(i) { return vals[i] * remaining / otherSum; });
       var floored = raw.map(function(v) { return Math.floor(v); });
       var deficit = remaining - floored.reduce(function(a, b) { return a + b; }, 0);
-      raw
-        .map(function(v, k) { return { k: k, frac: v - Math.floor(v) }; })
-        .sort(function(a, b) { return b.frac - a.frac; })
-        .forEach(function(o, rank) { if (rank < deficit) floored[o.k]++; });
+      raw.map(function(v, k) { return { k: k, frac: v - Math.floor(v) }; })
+         .sort(function(a, b) { return b.frac - a.frac; })
+         .forEach(function(o, rank) { if (rank < deficit) floored[o.k]++; });
       others.forEach(function(i, k) { vals[i] = Math.max(0, floored[k]); });
     }
 
     vals[idx] = newVal;
-
-    /* Final safety pass — correct any ±1 rounding residual */
     fixGap();
     updateUI();
   }
 
-  /* ── Sync sliders, hidden inputs, labels, chart, summary ── */
-  function updateUI() {
-    var total     = 0;
-    var wtdReturn = 0;
+  function fmtPct(v) {
+    var r = Math.round(v);
+    return (r >= 0 ? '+' : '') + r + '%';
+  }
 
+  function updateUI() {
+    var total = 0, portMean = 0, portVar = 0;
     ASSETS.forEach(function(key, i) {
-      /* Guarantee clean integer */
       var v = Math.round(vals[i]);
       vals[i] = v;
-
-      /* UI elements */
-      document.getElementById('range-' + key).value       = v;
-      document.getElementById('label-' + key).textContent = v + '%';
-      document.getElementById('lpct-'  + key).textContent = v + '%';
-
-      /* Hidden inputs — what oTree actually reads on POST */
-      document.getElementById('id_alloc_' + key).value = v;
-
-      total     += v;
-      wtdReturn += v * RETURNS[i];
+      document.getElementById('range-'    + key).value       = v;
+      document.getElementById('label-'    + key).textContent = v + '%';
+      document.getElementById('lpct-'     + key).textContent = v + '%';
+      document.getElementById('id_alloc_' + key).value       = v;
+      var w = v / 100;
+      total    += v;
+      portMean += w * RETURNS[i];
+      portVar  += w * w * SIGMAS[i] * SIGMAS[i];
     });
 
-    /* Weighted average return */
-    document.getElementById('wtd-return').textContent = (wtdReturn / 100).toFixed(1) + '%';
+    var portSigma = Math.sqrt(portVar);
+    document.getElementById('wtd-return').textContent =
+      fmtPct(portMean - portSigma) + ' to ' + fmtPct(portMean + portSigma);
 
-    /* Total indicator (summary box) */
     var totalEl = document.getElementById('total-display');
     totalEl.textContent = total + '%';
     totalEl.className   = 'pc-stat-val ' + (total === 100 ? 'total-ok' : 'total-warn');
 
-    /* Plain-text total below the button */
     var plainEl = document.getElementById('plain-total');
     plainEl.textContent = total;
     plainEl.style.color = (total === 100) ? '#15803d' : '#b91c1c';
 
-    /* Chart */
     chart.data.datasets[0].data = vals.slice();
     chart.update();
 
-    /* Submit guard */
     document.getElementById('port-submit').disabled = (total !== 100);
   }
 </script>
