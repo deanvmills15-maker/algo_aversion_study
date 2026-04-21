@@ -1,0 +1,359 @@
+{% block title %}Study Instructions{% endblock %}
+
+{% block content %}
+
+<style>
+  body { background: #f8f9fb; }
+
+  .inst-wrap {
+    max-width: 680px;
+    margin: 2.5rem auto;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  /* ── Header ── */
+  .inst-stage-badge {
+    display: inline-block;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: .72rem;
+    font-weight: 600;
+    padding: .25rem .75rem;
+    border-radius: 100px;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    margin-bottom: .65rem;
+  }
+
+  .inst-wrap h2 {
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 .35rem;
+    letter-spacing: -.02em;
+  }
+
+  .inst-sub {
+    font-size: .9rem;
+    color: #64748b;
+    line-height: 1.6;
+    margin: 0 0 1.75rem;
+  }
+
+  /* ── Participant ID card ── */
+  .pid-card {
+    background: #0f172a;
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .pid-left { flex: 1; }
+
+  .pid-eyebrow {
+    font-size: .68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: #64748b;
+    margin-bottom: .3rem;
+  }
+
+  .pid-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #f8fafc;
+    letter-spacing: .08em;
+    font-variant-numeric: tabular-nums;
+    word-break: break-all;
+  }
+
+  .pid-copy-btn {
+    background: #1e293b;
+    border: 1.5px solid #334155;
+    color: #94a3b8;
+    border-radius: 8px;
+    padding: .5rem .9rem;
+    font-size: .78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .pid-copy-btn:hover { background: #334155; color: #e2e8f0; border-color: #475569; }
+  .pid-copy-btn.copied { background: #14532d; border-color: #15803d; color: #86efac; }
+
+  .pid-note {
+    font-size: .75rem;
+    color: #475569;
+    margin-top: .6rem;
+  }
+
+  /* ── Step list ── */
+  .inst-steps {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+  }
+
+  .inst-step {
+    display: flex;
+    align-items: flex-start;
+    gap: .9rem;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: .9rem 1rem;
+  }
+
+  .step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: .8rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: .05rem;
+  }
+
+  .step-body { flex: 1; }
+
+  .step-title {
+    font-size: .9rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: .15rem;
+  }
+
+  .step-desc {
+    font-size: .82rem;
+    color: #64748b;
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  /* ── Duration / payment info ── */
+  .inst-meta {
+    display: flex;
+    gap: .75rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .meta-chip {
+    flex: 1;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: .75rem 1rem;
+    text-align: center;
+  }
+
+  .meta-chip-label {
+    font-size: .68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: #94a3b8;
+    margin-bottom: .2rem;
+  }
+
+  .meta-chip-value {
+    font-size: .95rem;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  /* ── Consent checkbox ── */
+  .consent-row {
+    display: flex;
+    align-items: flex-start;
+    gap: .75rem;
+    background: #fefce8;
+    border: 1.5px solid #fde047;
+    border-radius: 10px;
+    padding: .9rem 1rem;
+    margin-bottom: 1.5rem;
+    cursor: pointer;
+  }
+
+  .consent-row input[type="checkbox"] {
+    margin-top: .2rem;
+    width: 18px;
+    height: 18px;
+    accent-color: #2563eb;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+
+  .consent-text {
+    font-size: .85rem;
+    color: #713f12;
+    line-height: 1.5;
+  }
+
+  /* ── Submit ── */
+  #inst-submit {
+    display: block;
+    width: 100%;
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: .9rem;
+    font-size: .95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+    margin-bottom: .75rem;
+  }
+  #inst-submit:hover:not(:disabled) {
+    background: #1d4ed8;
+    box-shadow: 0 4px 12px rgba(37,99,235,.3);
+    transform: translateY(-1px);
+  }
+  #inst-submit:disabled { background: #94a3b8; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .inst-footnote { text-align: center; font-size: .75rem; color: #94a3b8; }
+
+  .otree-btn-next { display: none !important; }
+</style>
+
+<div class="inst-wrap">
+  <div class="text-center">
+    <span class="inst-stage-badge">Algorithm Aversion Study</span>
+    <h2>Welcome &amp; Study Instructions</h2>
+    <p class="inst-sub">
+      Please read the instructions below carefully before beginning.
+      This study takes approximately 15–20 minutes.
+    </p>
+  </div>
+
+  {# ── Participant ID ── #}
+  <div class="pid-card">
+    <div class="pid-left">
+      <div class="pid-eyebrow">Your Participant ID</div>
+      <div class="pid-value" id="pid-display">{{ pid }}</div>
+      <div class="pid-note">Record this ID — you may need it to claim payment.</div>
+    </div>
+    <button type="button" class="pid-copy-btn" id="copy-btn" onclick="copyPID()">
+      Copy
+    </button>
+  </div>
+
+  {# ── Study overview chips ── #}
+  <div class="inst-meta">
+    <div class="meta-chip">
+      <div class="meta-chip-label">Duration</div>
+      <div class="meta-chip-value">~15–20 min</div>
+    </div>
+    <div class="meta-chip">
+      <div class="meta-chip-label">Stages</div>
+      <div class="meta-chip-value">3</div>
+    </div>
+    <div class="meta-chip">
+      <div class="meta-chip-label">Participation Fee</div>
+      <div class="meta-chip-value">$5.00</div>
+    </div>
+    <div class="meta-chip">
+      <div class="meta-chip-label">Bonus (max)</div>
+      <div class="meta-chip-value">$10.00</div>
+    </div>
+  </div>
+
+  {# ── Step-by-step overview ── #}
+  <ul class="inst-steps">
+    <li class="inst-step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Risk Preference Elicitation</div>
+        <p class="step-desc">
+          You will choose between five investment options, each with two equally
+          likely payoffs. <strong>This is a one-time decision that cannot be changed</strong>
+          once submitted. Your choice directly impacts your final payout — one option
+          will be randomly selected and paid out at the end of the study.
+        </p>
+        <p class="step-desc" style="margin-top:.5rem;">
+          Your choice will also be used to calibrate a personalized investment
+          portfolio that will be presented to you later in the study.
+        </p>
+      </div>
+    </li>
+    <li class="inst-step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Portfolio Construction &amp; Beliefs</div>
+        <p class="step-desc">
+          You will build a portfolio across five asset classes and indicate your
+          beliefs about how each type of investment advisor is likely to perform.
+        </p>
+      </div>
+    </li>
+    <li class="inst-step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Advisor Valuation</div>
+        <p class="step-desc">
+          Across five rounds, you will state the maximum fee you would pay to have
+          either a Human Wealth Manager or an AI Advisor manage your portfolio.
+          One decision will be randomly selected to determine your bonus payment.
+        </p>
+      </div>
+    </li>
+  </ul>
+
+  {# ── Consent ── #}
+  <form method="post">
+    <label class="consent-row" for="consent-check">
+      <input type="checkbox" id="consent-check" onchange="toggleSubmit()">
+      <span class="consent-text">
+        I have read the instructions above. I understand that this is a research
+        study, that my participation is voluntary, and that one of my decisions
+        will be randomly selected to determine my bonus payment.
+      </span>
+    </label>
+
+    <button type="submit" id="inst-submit" disabled>
+      Begin Study →
+    </button>
+  </form>
+
+  <p class="inst-footnote">
+    Participant ID: <strong>{{ pid }}</strong> &nbsp;·&nbsp;
+    Session recorded {{ now }}
+  </p>
+</div>
+
+<script>
+  function toggleSubmit() {
+    document.getElementById('inst-submit').disabled =
+      !document.getElementById('consent-check').checked;
+  }
+
+  function copyPID() {
+    var pid = document.getElementById('pid-display').textContent.trim();
+    navigator.clipboard.writeText(pid).then(function () {
+      var btn = document.getElementById('copy-btn');
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(function () {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+</script>
+
+{% endblock %}

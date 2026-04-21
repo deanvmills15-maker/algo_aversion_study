@@ -1,4 +1,7 @@
 from otree.api import *
+import random
+import string
+from datetime import datetime
 
 doc = """
 Eckel-Grossman risk elicitation. Participants choose one of 5 investment options
@@ -35,10 +38,27 @@ class Player(BasePlayer):
     )
 
 
+def generate_participant_id():
+    timestamp = datetime.now().strftime('%Y%m%d')
+    suffix = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+    return f'{timestamp}-{suffix}'
+
+
 def set_payoffs(player: Player):
     import random
     gamble = next(g for g in C.GAMBLES if g['num'] == player.gamble_choice)
     player.payoff = cu(random.choice([gamble['a'], gamble['b']]))
+
+
+class Instructions(Page):
+    @staticmethod
+    def vars_for_template(player: Player):
+        if not player.participant.vars.get('participant_id_custom'):
+            player.participant.vars['participant_id_custom'] = generate_participant_id()
+        return dict(
+            pid=player.participant.vars.get('participant_id_custom'),
+            now=datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC'),
+        )
 
 
 class GambleChoice(Page):
@@ -52,10 +72,12 @@ class GambleChoice(Page):
     @staticmethod
     def before_next_page(player: Player, timeout_happened):
         set_payoffs(player)
+        mapping = {1: 'Very Conservative', 2: 'Conservative', 3: 'Moderate', 4: 'Aggressive', 5: 'Very Aggressive'}
+        player.participant.vars['risk_profile'] = mapping.get(player.gamble_choice)
 
 
 class Results(Page):
     pass
 
 
-page_sequence = [GambleChoice, Results]
+page_sequence = [Instructions, GambleChoice, Results]
