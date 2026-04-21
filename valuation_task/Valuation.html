@@ -130,7 +130,7 @@
 
 <div class="vt-card">
   <div class="text-center">
-    <span class="vt-stage-badge">Round {{ player.round_number }} of 5</span>
+    <span class="vt-stage-badge">Valuation {{ advisor_num }} of 2</span>
     <h2>Investment Advice Valuation</h2>
     <div class="vt-advisor-label">{{ advisor_type }}</div>
     <p class="vt-sub">
@@ -201,7 +201,7 @@
     </div>
 
     {# Hidden field oTree reads for switch_point #}
-    <input type="hidden" name="switch_point" id="switch_point_input" value="">
+    <input type="hidden" name="{{ field_name }}" id="switch_point_input" value="">
 
     <button type="submit" id="vt-submit">Confirm &amp; Continue</button>
   </form>

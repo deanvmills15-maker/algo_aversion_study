@@ -144,8 +144,4 @@ class BeliefElicitationEarly(Page):
     error_message = staticmethod(_belief_error)
 
 
-class Results(Page):
-    pass
-
-
-page_sequence = [Instructions, GambleChoice, BeliefElicitationEarly, Results]
+page_sequence = [Instructions, GambleChoice, BeliefElicitationEarly]
