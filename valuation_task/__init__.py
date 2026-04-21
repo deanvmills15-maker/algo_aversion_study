@@ -1,3 +1,4 @@
+import random
 from otree.api import *
 
 doc = """
@@ -6,7 +7,7 @@ professional investment advice (Human Wealth Manager or AI Advisor) across
 5 rounds. Switch point is elicited via a multiple price list (prices $1-$10).
 Portfolio construction screen collects 5-asset allocation (shown in round 1 only).
 Belief elicitation collects 20-token histogram beliefs over 7 return bins for
-both Human Wealth Manager and AI Advisor (shown in round 1 only).
+both Human Wealth Manager and AI Advisor (timing controlled by timing_group).
 """
 
 
@@ -40,6 +41,12 @@ class C(BaseConstants):
 
 class Subsession(BaseSubsession):
     pass
+
+
+def creating_session(subsession):
+    for player in subsession.get_players():
+        if 'timing_group' not in player.participant.vars:
+            player.participant.vars['timing_group'] = random.choice(['before', 'after'])
 
 
 class Group(BaseGroup):
@@ -87,10 +94,6 @@ class PortfolioConstruction(Page):
     def error_message(player: Player, values):
         fields = ['alloc_tbills', 'alloc_index', 'alloc_reits', 'alloc_stocks', 'alloc_crypto']
         total = sum(values[f] for f in fields)
-        print(
-            f"[PortfolioConstruction] sum={total} | "
-            + " | ".join(f"{f}={values[f]}" for f in fields)
-        )
         if total != 100:
             return f'Allocations sum to {total}%. Please adjust sliders to total exactly 100%.'
 
@@ -104,7 +107,10 @@ class BeliefElicitation(Page):
 
     @staticmethod
     def is_displayed(player: Player):
-        return player.round_number == 1
+        return (
+            player.participant.vars.get('timing_group') == 'after'
+            and player.round_number == 5
+        )
 
     @staticmethod
     def vars_for_template(player: Player):
@@ -117,7 +123,6 @@ class BeliefElicitation(Page):
     def error_message(player: Player, values):
         h_total = sum(values[f'h_bin{i}'] for i in range(1, 8))
         a_total = sum(values[f'a_bin{i}'] for i in range(1, 8))
-        print(f"[BeliefElicitation] h_total={h_total}, a_total={a_total}")
         if h_total != 20:
             return f'Human Wealth Manager tokens sum to {h_total}. Please use all 20 tokens.'
         if a_total != 20:

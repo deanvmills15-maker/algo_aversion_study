@@ -1,7 +1,7 @@
-from otree.api import *
 import random
 import string
 from datetime import datetime
+from otree.api import *
 
 doc = """
 Eckel-Grossman risk elicitation. Participants choose one of 5 investment options
@@ -22,9 +22,27 @@ class C(BaseConstants):
         {'num': 5, 'a': 42, 'b': -6},
     ]
 
+    TOTAL_TOKENS = 20
+
+    BIN_LABELS = [
+        '< −25%',
+        '−25% to −15%',
+        '−15% to −5%',
+        '−5% to +5%',
+        '+5% to +15%',
+        '+15% to +25%',
+        '> +25%',
+    ]
+
 
 class Subsession(BaseSubsession):
     pass
+
+
+def creating_session(subsession):
+    for player in subsession.get_players():
+        if 'timing_group' not in player.participant.vars:
+            player.participant.vars['timing_group'] = random.choice(['before', 'after'])
 
 
 class Group(BaseGroup):
@@ -37,6 +55,24 @@ class Player(BasePlayer):
         label='',
     )
 
+    # Belief elicitation — Human Wealth Manager
+    h_bin1 = models.IntegerField(initial=0)
+    h_bin2 = models.IntegerField(initial=0)
+    h_bin3 = models.IntegerField(initial=0)
+    h_bin4 = models.IntegerField(initial=0)
+    h_bin5 = models.IntegerField(initial=0)
+    h_bin6 = models.IntegerField(initial=0)
+    h_bin7 = models.IntegerField(initial=0)
+
+    # Belief elicitation — AI Advisor
+    a_bin1 = models.IntegerField(initial=0)
+    a_bin2 = models.IntegerField(initial=0)
+    a_bin3 = models.IntegerField(initial=0)
+    a_bin4 = models.IntegerField(initial=0)
+    a_bin5 = models.IntegerField(initial=0)
+    a_bin6 = models.IntegerField(initial=0)
+    a_bin7 = models.IntegerField(initial=0)
+
 
 def generate_participant_id():
     timestamp = datetime.now().strftime('%Y%m%d')
@@ -45,7 +81,6 @@ def generate_participant_id():
 
 
 def set_payoffs(player: Player):
-    import random
     gamble = next(g for g in C.GAMBLES if g['num'] == player.gamble_choice)
     player.payoff = cu(random.choice([gamble['a'], gamble['b']]))
 
@@ -76,8 +111,41 @@ class GambleChoice(Page):
         player.participant.vars['risk_profile'] = mapping.get(player.gamble_choice)
 
 
+def _belief_vars(player):
+    return dict(bin_labels=C.BIN_LABELS, total_tokens=C.TOTAL_TOKENS)
+
+
+def _belief_error(player, values):
+    h_total = sum(values[f'h_bin{i}'] for i in range(1, 8))
+    a_total = sum(values[f'a_bin{i}'] for i in range(1, 8))
+    if h_total != 20:
+        return f'Human Wealth Manager tokens sum to {h_total}. Please use all 20 tokens.'
+    if a_total != 20:
+        return f'AI Advisor tokens sum to {a_total}. Please use all 20 tokens.'
+
+
+_BELIEF_FIELDS = [
+    'h_bin1', 'h_bin2', 'h_bin3', 'h_bin4', 'h_bin5', 'h_bin6', 'h_bin7',
+    'a_bin1', 'a_bin2', 'a_bin3', 'a_bin4', 'a_bin5', 'a_bin6', 'a_bin7',
+]
+
+
+class BeliefElicitationEarly(Page):
+    """'before' group only — shown right after GambleChoice."""
+    template_name = 'risk_elicitation/BeliefElicitation.html'
+    form_model = 'player'
+    form_fields = _BELIEF_FIELDS
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.vars.get('timing_group') == 'before'
+
+    vars_for_template = staticmethod(_belief_vars)
+    error_message = staticmethod(_belief_error)
+
+
 class Results(Page):
     pass
 
 
-page_sequence = [Instructions, GambleChoice, Results]
+page_sequence = [Instructions, GambleChoice, BeliefElicitationEarly, Results]
