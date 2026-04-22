@@ -41,8 +41,8 @@ class Subsession(BaseSubsession):
 
 def creating_session(subsession):
     for player in subsession.get_players():
-        if 'timing_group' not in player.participant.vars:
-            player.participant.vars['timing_group'] = random.choice(['before', 'after'])
+        if 'beliefs_before' not in player.participant.vars:
+            player.participant.vars['beliefs_before'] = random.choice([True, False])
 
 
 class Group(BaseGroup):
@@ -138,7 +138,7 @@ class BeliefElicitationEarly(Page):
 
     @staticmethod
     def is_displayed(player: Player):
-        return player.participant.vars.get('timing_group') == 'before'
+        return player.participant.vars.get('beliefs_before') is True
 
     vars_for_template = staticmethod(_belief_vars)
     error_message = staticmethod(_belief_error)

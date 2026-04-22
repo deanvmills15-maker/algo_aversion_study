@@ -145,6 +145,20 @@
     margin: 0;
   }
 
+  .step-sub-list {
+    margin: .5rem 0 0;
+    padding-left: 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: .35rem;
+  }
+
+  .step-sub-list li {
+    font-size: .8rem;
+    color: #64748b;
+    line-height: 1.5;
+  }
+
   /* ── Duration / payment info ── */
   .inst-meta {
     display: flex;
@@ -286,18 +300,25 @@
           will be randomly selected and paid out at the end of the study.
         </p>
         <p class="step-desc" style="margin-top:.5rem;">
-          Your choice will also be used to calibrate a personalized investment
-          portfolio that will be presented to you later in the study.
+          Your choice will also be used to calibrate the personalized portfolios
+          that the Human Wealth Manager and AI Advisor would construct on your behalf
+          in Stage 3.
         </p>
       </div>
     </li>
     <li class="inst-step">
       <div class="step-num">2</div>
       <div class="step-body">
-        <div class="step-title">Portfolio Construction &amp; Beliefs</div>
+        <div class="step-title">Portfolio Construction</div>
         <p class="step-desc">
-          You will build a portfolio across five asset classes and indicate your
-          beliefs about how each type of investment advisor is likely to perform.
+          You will allocate 100% of a hypothetical investment account across five
+          asset classes — T-Bills, Index Funds, REITs, Common Stocks, and
+          Cryptocurrency. This portfolio will serve as your personal baseline in Stage 3.
+        </p>
+        <p class="step-desc" style="margin-top:.5rem;">
+          At some point during the study you will also be asked to indicate your
+          beliefs about how a Human Wealth Manager and an AI Advisor are each likely
+          to perform, using a token-allocation task.
         </p>
       </div>
     </li>
@@ -306,9 +327,30 @@
       <div class="step-body">
         <div class="step-title">Advisor Valuation</div>
         <p class="step-desc">
-          Across five rounds, you will state the maximum fee you would pay to have
-          either a Human Wealth Manager or an AI Advisor manage your portfolio.
-          One decision will be randomly selected to determine your bonus payment.
+          You will complete two separate valuation tasks — one for a
+          <strong>Human Wealth Manager</strong> and one for an <strong>AI Advisor</strong>.
+          For each, you will see a table with 10 rows presenting the same choice at
+          increasing advisory fees ($1 through $10):
+        </p>
+        <ul class="step-sub-list">
+          <li>
+            <strong>Keep your portfolio</strong> — You retain the portfolio you built
+            in Stage 2. It contributes to your participation payout based on its
+            simulated performance.
+          </li>
+          <li>
+            <strong>Replace your portfolio</strong> — Your portfolio is replaced by
+            the advisor's portfolio, which is built using the risk preferences you
+            revealed in Stage 1. You pay the listed fee out of your participation
+            earnings, and the advisor's portfolio determines your payout instead.
+          </li>
+        </ul>
+        <p class="step-desc" style="margin-top:.6rem;">
+          Use the arrow buttons (<strong>←</strong> / <strong>→</strong>) in each
+          row to record your preference at that fee level. Selecting an option will
+          automatically update all other rows to keep your choices consistent.
+          There are no right or wrong answers — please respond based on your
+          genuine preferences.
         </p>
       </div>
     </li>

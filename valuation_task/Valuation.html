@@ -244,35 +244,11 @@
     <span class="vt-stage-badge">Valuation {{ advisor_num }} of 2</span>
     <h2>Investment Advice Valuation</h2>
     <div class="vt-advisor-label">{{ advisor_type }}</div>
-    <div class="vt-instructions">
-      <p class="vt-inst-lead">
-        Each row below presents a choice between two options at a specific advisory fee.
-        Work through the rows and use the arrows to record your honest preference for each fee level.
-      </p>
-      <ul class="vt-inst-list">
-        <li>
-          <strong>Keep your portfolio</strong> — You retain the portfolio you constructed
-          in the previous section. This portfolio contributes to your participation payout
-          based on its simulated performance.
-        </li>
-        <li>
-          <strong>Replace your portfolio</strong> — Your portfolio is replaced by one managed
-          by the <strong>{{ advisor_type }}</strong>, and you pay the listed fee out of
-          your participation earnings. The advisor's portfolio then contributes to your payout instead.
-          The {{ advisor_type }}'s portfolio has been constructed using the risk preferences
-          you revealed in the investment option assessment at the start of the study.
-        </li>
-        <li>
-          <strong>How the arrows work</strong> — Click <strong>→</strong> on a row if you
-          would be willing to pay that fee for the {{ advisor_type }}'s portfolio.
-          Click <strong>←</strong> if you would prefer to keep your own portfolio at that fee.
-          Rows above and below will update automatically to keep your choices consistent.
-        </li>
-        <li>
-          There are no right or wrong answers — please respond based on your genuine preferences.
-        </li>
-      </ul>
-    </div>
+    <p class="vt-sub">
+      Click <strong>→</strong> on a row to indicate you would pay that fee for the
+      {{ advisor_type }}'s portfolio, or <strong>←</strong> to keep your own.
+      Rows above and below will update automatically.
+    </p>
   </div>
 
   <form method="post" id="vt-form">
