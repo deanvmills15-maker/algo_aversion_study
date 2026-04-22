@@ -825,11 +825,10 @@
     document.getElementById('belief-score-val').style.opacity  = '1';
     document.getElementById('belief-payout-val').style.opacity = '1';
 
-    /* ── Show totals & next button ── */
+    /* ── Show totals & next button after animations settle ── */
     setTimeout(function() {
-      document.getElementById('payout-totals').style.display   = 'block';
-      document.getElementById('next-btn-wrap').style.display   = 'block';
-      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      document.getElementById('payout-totals').style.display = 'block';
+      document.getElementById('next-btn-wrap').style.display = 'block';
     }, 1600);
   }
 </script>
