@@ -109,6 +109,10 @@ class GambleChoice(Page):
         set_payoffs(player)
         mapping = {1: 'Very Conservative', 2: 'Conservative', 3: 'Moderate', 4: 'Aggressive', 5: 'Very Aggressive'}
         player.participant.vars['risk_profile'] = mapping.get(player.gamble_choice)
+        gamble = next(g for g in C.GAMBLES if g['num'] == player.gamble_choice)
+        player.participant.vars['gamble_choice'] = player.gamble_choice
+        player.participant.vars['gamble_a']      = gamble['a']
+        player.participant.vars['gamble_b']      = gamble['b']
 
 
 def _belief_vars(player):
@@ -141,7 +145,16 @@ class BeliefElicitationEarly(Page):
         return player.participant.vars.get('beliefs_before') is True
 
     vars_for_template = staticmethod(_belief_vars)
-    error_message = staticmethod(_belief_error)
+    error_message    = staticmethod(_belief_error)
+
+    @staticmethod
+    def before_next_page(player: Player, timeout_happened):
+        # Store bins in participant.vars so Payout page can read them
+        # regardless of which app they were collected in.
+        player.participant.vars['beliefs_timing'] = 'before'
+        for i in range(1, 8):
+            player.participant.vars[f'h_bin{i}'] = getattr(player, f'h_bin{i}')
+            player.participant.vars[f'a_bin{i}'] = getattr(player, f'a_bin{i}')
 
 
 page_sequence = [Instructions, GambleChoice, BeliefElicitationEarly]

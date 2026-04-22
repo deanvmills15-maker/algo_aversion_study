@@ -1,0 +1,837 @@
+{% block title %}Your Study Results{% endblock %}
+
+{% block content %}
+
+<style>
+  body { background: #f8f9fb; }
+
+  .po-wrap {
+    max-width: 980px;
+    margin: 2rem auto;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  .po-stage-badge {
+    display: inline-block;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: .72rem;
+    font-weight: 600;
+    padding: .25rem .75rem;
+    border-radius: 100px;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    margin-bottom: .65rem;
+  }
+
+  .po-wrap h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 .3rem;
+    letter-spacing: -.02em;
+  }
+
+  .po-sub {
+    font-size: .875rem;
+    color: #64748b;
+    margin: 0 0 1.75rem;
+    line-height: 1.6;
+  }
+
+  /* ── Cards ── */
+  .po-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 1.25rem 1.25rem 1rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .po-card-eyebrow {
+    font-size: .65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .09em;
+    color: #94a3b8;
+    margin-bottom: .3rem;
+  }
+
+  .po-card-title {
+    font-size: .95rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 0;
+  }
+
+  .po-divider {
+    border: none;
+    border-top: 1px solid #f1f5f9;
+    margin: .75rem 0;
+  }
+
+  /* ── Card 1: Gamble ── */
+  .gamble-option-row {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .45rem .75rem;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    margin-bottom: .35rem;
+    transition: all .4s;
+  }
+
+  .gamble-option-row.winner {
+    border-color: #22c55e;
+    background: #f0fdf4;
+  }
+
+  .go-label {
+    font-size: .7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: #94a3b8;
+    width: 3.5rem;
+    flex-shrink: 0;
+  }
+
+  .go-value {
+    font-size: .95rem;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  .go-winner-badge {
+    margin-left: auto;
+    background: #22c55e;
+    color: #fff;
+    font-size: .65rem;
+    font-weight: 700;
+    padding: .15rem .5rem;
+    border-radius: 100px;
+    display: none;
+    white-space: nowrap;
+  }
+
+  .po-payout-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+  }
+
+  .po-payout-label {
+    font-size: .75rem;
+    color: #94a3b8;
+    font-weight: 500;
+  }
+
+  .po-payout-value {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #0f172a;
+    opacity: 0;
+    transition: opacity .5s .2s;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Card 2: Gauge ── */
+  .advisor-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .2rem .75rem;
+    margin-bottom: .6rem;
+  }
+
+  .am-item { font-size: .75rem; }
+  .am-key  { color: #94a3b8; }
+  .am-val  { font-weight: 600; color: #334155; }
+
+  .gauge-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #gauge-canvas {
+    display: block;
+    max-width: 100%;
+  }
+
+  .gauge-return-display {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #0f172a;
+    text-align: center;
+    line-height: 1;
+    opacity: 0;
+    transition: opacity .5s .2s;
+    margin-top: .3rem;
+  }
+
+  .gauge-return-sub {
+    font-size: .7rem;
+    color: #94a3b8;
+    text-align: center;
+    margin-top: .15rem;
+  }
+
+  /* ── Card 3: Beliefs ── */
+  .belief-chart-wrap {
+    flex: 1;
+    min-height: 140px;
+    position: relative;
+  }
+
+  .belief-legend {
+    display: flex;
+    gap: .9rem;
+    justify-content: center;
+    margin-top: .4rem;
+    font-size: .7rem;
+    color: #64748b;
+  }
+
+  .legend-swatch {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    margin-right: .25rem;
+    vertical-align: middle;
+  }
+
+  .belief-score-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: .78rem;
+    color: #64748b;
+    margin-top: .4rem;
+  }
+
+  #belief-score-val {
+    font-weight: 700;
+    color: #334155;
+    opacity: 0;
+    transition: opacity .5s .2s;
+  }
+
+  /* ── Reveal button ── */
+  #reveal-btn {
+    display: block;
+    width: 100%;
+    background: #0f172a;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: .9rem;
+    font-size: .95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+    margin-bottom: 0;
+  }
+
+  #reveal-btn:hover:not(:disabled) {
+    background: #1e293b;
+    box-shadow: 0 4px 16px rgba(15,23,42,.3);
+    transform: translateY(-1px);
+  }
+
+  #reveal-btn:disabled {
+    background: #64748b;
+    cursor: default;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* ── Totals ── */
+  .payout-totals {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 1.25rem 1.5rem;
+    margin-top: 1.5rem;
+    display: none;
+  }
+
+  .totals-heading {
+    font-size: .75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: #94a3b8;
+    margin: 0 0 .9rem;
+  }
+
+  .totals-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .totals-table td {
+    padding: .45rem 0;
+    font-size: .875rem;
+    vertical-align: top;
+  }
+
+  .totals-table tr + tr td {
+    border-top: 1px solid #f1f5f9;
+  }
+
+  .t-label { color: #334155; line-height: 1.4; }
+  .t-sub   { font-size: .75rem; color: #94a3b8; }
+
+  .t-val {
+    text-align: right;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    padding-left: 1rem;
+  }
+
+  .t-pos { color: #16a34a; }
+  .t-neg { color: #dc2626; }
+  .t-neutral { color: #64748b; }
+
+  .total-row td {
+    padding-top: .85rem !important;
+    border-top: 2px solid #0f172a !important;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  .total-row .t-val {
+    font-size: 1.15rem;
+    color: #0f172a;
+  }
+
+  /* ── Next button ── */
+  #next-btn-wrap { display: none; margin-top: 1.25rem; }
+
+  .po-next-btn {
+    display: block;
+    width: 100%;
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: .9rem;
+    font-size: .95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+    margin-bottom: .75rem;
+  }
+
+  .po-next-btn:hover {
+    background: #1d4ed8;
+    box-shadow: 0 4px 12px rgba(37,99,235,.3);
+    transform: translateY(-1px);
+  }
+
+  .po-footnote {
+    text-align: center;
+    font-size: .78rem;
+    color: #94a3b8;
+  }
+
+  .otree-btn-next { display: none !important; }
+</style>
+
+<div class="po-wrap">
+
+  <div class="text-center mb-4">
+    <span class="po-stage-badge">Final Results</span>
+    <h2>Your Study Payout</h2>
+    <p class="po-sub">
+      Each component below contributed to your earnings. Click <strong>Reveal My Results</strong>
+      to see how each outcome resolved.
+    </p>
+  </div>
+
+  <div class="row g-3 mb-4">
+
+    {# ══════════════════════════════════════
+       Card 1 — Risk Assessment
+    ══════════════════════════════════════ #}
+    <div class="col-md-4">
+      <div class="po-card shadow-sm">
+        <div class="po-card-eyebrow">Component 1</div>
+        <div class="po-card-title">Risk Assessment</div>
+        <hr class="po-divider">
+
+        <p style="font-size:.78rem; color:#64748b; margin:0 0 .65rem; line-height:1.5">
+          You chose <strong>Option {{ gamble_choice }}</strong> — a 50/50 gamble
+          between <strong>{{ gamble_a_display }}</strong> and <strong>{{ gamble_b_display }}</strong>.
+          One outcome was drawn at random.
+        </p>
+
+        <div class="gamble-option-row" id="row-a">
+          <span class="go-label">Option A</span>
+          <span class="go-value">{{ gamble_a_display }}</span>
+          <span class="go-winner-badge" id="badge-a">Drawn ✓</span>
+        </div>
+        <div class="gamble-option-row" id="row-b">
+          <span class="go-label">Option B</span>
+          <span class="go-value">{{ gamble_b_display }}</span>
+          <span class="go-winner-badge" id="badge-b">Drawn ✓</span>
+        </div>
+
+        <hr class="po-divider">
+        <div class="po-payout-row">
+          <span class="po-payout-label">Gamble payout</span>
+          <span class="po-payout-value" id="gamble-payout-val">{{ gamble_payout_display }}</span>
+        </div>
+      </div>
+    </div>
+
+    {# ══════════════════════════════════════
+       Card 2 — Portfolio Performance
+    ══════════════════════════════════════ #}
+    <div class="col-md-4">
+      <div class="po-card shadow-sm">
+        <div class="po-card-eyebrow">Component 2</div>
+        <div class="po-card-title">Portfolio Performance</div>
+        <hr class="po-divider">
+
+        <div class="advisor-meta">
+          <div class="am-item">
+            <div class="am-key">Advisor drawn</div>
+            <div class="am-val">{{ advisor_label }}</div>
+          </div>
+          <div class="am-item">
+            <div class="am-key">Fee drawn</div>
+            <div class="am-val">${{ selected_fee }}</div>
+          </div>
+          <div class="am-item">
+            <div class="am-key">Your switch point</div>
+            <div class="am-val">${{ switch_point }}</div>
+          </div>
+          <div class="am-item">
+            <div class="am-key">Portfolio used</div>
+            <div class="am-val">
+              {% if uses_advisor %}Advisor's{% else %}Your own{% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="gauge-area">
+          <canvas id="gauge-canvas" width="270" height="155"></canvas>
+          <div class="gauge-return-display" id="gauge-label">—</div>
+          <div class="gauge-return-sub">Simulated Annual Return</div>
+        </div>
+
+        <hr class="po-divider">
+        <div class="po-payout-row">
+          <span class="po-payout-label">Portfolio payout</span>
+          <span class="po-payout-value" id="portfolio-payout-val">{{ portfolio_payout_display }}</span>
+        </div>
+      </div>
+    </div>
+
+    {# ══════════════════════════════════════
+       Card 3 — Belief Accuracy
+    ══════════════════════════════════════ #}
+    <div class="col-md-4">
+      <div class="po-card shadow-sm">
+        <div class="po-card-eyebrow">Component 3</div>
+        <div class="po-card-title">Belief Accuracy</div>
+        <hr class="po-divider">
+
+        <p style="font-size:.78rem; color:#64748b; margin:0 0 .5rem; line-height:1.5">
+          Your predicted return distribution for the
+          <strong>{{ advisor_label }}</strong>
+          compared to the actual distribution used.
+        </p>
+
+        <div class="belief-chart-wrap">
+          <canvas id="belief-chart"></canvas>
+        </div>
+
+        <div class="belief-legend">
+          <span>
+            <span class="legend-swatch" style="background:rgba(37,99,235,.55)"></span>
+            Your Beliefs
+          </span>
+          <span id="actual-legend" style="display:none">
+            <span class="legend-swatch" style="background:rgba(15,23,42,.7)"></span>
+            Actual Distribution
+          </span>
+        </div>
+
+        <div class="belief-score-row">
+          <span>Accuracy score</span>
+          <span id="belief-score-val">—</span>
+        </div>
+
+        <hr class="po-divider">
+        <div class="po-payout-row">
+          <span class="po-payout-label">Belief payout</span>
+          <span class="po-payout-value" id="belief-payout-val">+${{ belief_payout }}</span>
+        </div>
+      </div>
+    </div>
+
+  </div>{# end row #}
+
+  {# ── Reveal button ── #}
+  <button type="button" id="reveal-btn" onclick="revealResults()">
+    Reveal My Results →
+  </button>
+
+  {# ── Payout breakdown ── #}
+  <div class="payout-totals" id="payout-totals">
+    <div class="totals-heading">Payout Breakdown</div>
+    <table class="totals-table">
+      <tbody>
+        <tr>
+          <td class="t-label">Guaranteed participation fee</td>
+          <td class="t-val t-pos">+$5.00</td>
+        </tr>
+        <tr>
+          <td class="t-label">
+            Component 1 — Risk Assessment
+            <div class="t-sub">Option {{ gamble_choice }} · Outcome {{ gamble_result }}</div>
+          </td>
+          <td class="t-val {% if gamble_payout >= 0 %}t-pos{% else %}t-neg{% endif %}">
+            {{ gamble_payout_display }}
+          </td>
+        </tr>
+        <tr>
+          <td class="t-label">
+            Component 2 — Portfolio Performance
+            <div class="t-sub">
+              {{ advisor_label }} · fee ${{ selected_fee }} ·
+              {% if uses_advisor %}advisor portfolio{% else %}own portfolio{% endif %} ·
+              {{ simulated_return }}% return
+            </div>
+          </td>
+          <td class="t-val {% if portfolio_payout >= 0 %}t-pos{% else %}t-neg{% endif %}">
+            {{ portfolio_payout_display }}
+          </td>
+        </tr>
+        <tr>
+          <td class="t-label">
+            Component 3 — Belief Accuracy
+            <div class="t-sub">Quadratic score: {{ belief_score }} × $5</div>
+          </td>
+          <td class="t-val t-pos">+${{ belief_payout }}</td>
+        </tr>
+        <tr>
+          <td class="t-label t-sub" style="font-size:.78rem">
+            Variable subtotal (floor $0.00 applied if negative)
+          </td>
+          <td class="t-val t-neutral" style="font-size:.78rem">
+            {{ variable_raw_display }} → ${{ performance_payout }}
+          </td>
+        </tr>
+        <tr class="total-row">
+          <td class="t-label">Total payout</td>
+          <td class="t-val t-pos">${{ total_payout }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  {# ── Next button (appears after reveal) ── #}
+  <div id="next-btn-wrap">
+    <form method="post">
+      <button type="submit" class="po-next-btn">Complete Study →</button>
+    </form>
+    <p class="po-footnote">Thank you for participating. Your earnings have been recorded.</p>
+  </div>
+
+</div>{# end po-wrap #}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+  /* ── Server data ── */
+  var GAMBLE_RESULT     = '{{ gamble_result }}';
+  var SIMULATED_RETURN  = {{ simulated_return }};
+  var PARTICIPANT_PROBS = {{ participant_probs }};
+  var ACTUAL_DIST       = {{ actual_dist }};
+  var BELIEF_SCORE      = {{ belief_score }};
+
+  var BIN_LABELS = [
+    '<−25%', '−25 to −15%', '−15 to −5%',
+    '−5 to +5%', '+5 to +15%', '+15 to +25%', '>+25%'
+  ];
+
+  /* ════════════════════════════════════════════════
+     GAUGE
+     Arc spans π (left, 9 o'clock) → 2π (right, 3 o'clock)
+     going clockwise through 3π/2 (12 o'clock) = top semicircle.
+     Canvas angle for return value = π + pct × π
+     where pct = (return − GAUGE_MIN) / GAUGE_RANGE
+  ════════════════════════════════════════════════ */
+  var GAUGE_MIN   = -50;
+  var GAUGE_MAX   = 100;
+  var GAUGE_RANGE = 150;
+
+  var gaugeCanvas = document.getElementById('gauge-canvas');
+  var gCtx        = gaugeCanvas.getContext('2d');
+  var gW = gaugeCanvas.width;   /* 270 */
+  var gH = gaugeCanvas.height;  /* 155 */
+  var gCX  = 135;   /* horizontal centre */
+  var gCY  = 132;   /* vertical centre — leaves ~23 px below for labels */
+  var gR   = 100;   /* arc radius — keeps outer edge (r+9+2=111) within the 135 px half-width */
+  var LINE_W = 18;
+
+  function returnToPct(ret) {
+    return (ret - GAUGE_MIN) / GAUGE_RANGE;
+  }
+
+  function pctToCanvasAngle(pct) {
+    /* Clockwise from π (left) to 2π (right) through top */
+    return Math.PI + pct * Math.PI;
+  }
+
+  function drawGauge(needlePct, showNeedle) {
+    gCtx.clearRect(0, 0, gW, gH);
+
+    var pctRedEnd   = returnToPct(-5);   /* 45/150 = 0.30 */
+    var pctAmberEnd = returnToPct(15);   /* 65/150 = 0.433 */
+    var aRed   = pctToCanvasAngle(pctRedEnd);
+    var aAmber = pctToCanvasAngle(pctAmberEnd);
+
+    /* Background track */
+    gCtx.lineWidth   = LINE_W;
+    gCtx.lineCap     = 'butt';
+    gCtx.strokeStyle = '#f1f5f9';
+    gCtx.beginPath();
+    gCtx.arc(gCX, gCY, gR, Math.PI, 2 * Math.PI, false);
+    gCtx.stroke();
+
+    /* Red zone: π → aRed */
+    gCtx.strokeStyle = '#ef4444';
+    gCtx.beginPath();
+    gCtx.arc(gCX, gCY, gR, Math.PI, aRed, false);
+    gCtx.stroke();
+
+    /* Amber zone: aRed → aAmber */
+    gCtx.strokeStyle = '#f59e0b';
+    gCtx.beginPath();
+    gCtx.arc(gCX, gCY, gR, aRed, aAmber, false);
+    gCtx.stroke();
+
+    /* Green zone: aAmber → 2π */
+    gCtx.strokeStyle = '#22c55e';
+    gCtx.beginPath();
+    gCtx.arc(gCX, gCY, gR, aAmber, 2 * Math.PI, false);
+    gCtx.stroke();
+
+    /* Zone labels */
+    var labelPairs = [
+      { ret: -27, text: 'Loss' },
+      { ret:  5,  text: 'Modest' },
+      { ret: 55,  text: 'Strong' },
+    ];
+    gCtx.font = 'bold 8px Inter, sans-serif';
+    gCtx.textAlign = 'center';
+    gCtx.textBaseline = 'middle';
+    labelPairs.forEach(function(lp) {
+      var p   = returnToPct(lp.ret);
+      var ang = pctToCanvasAngle(p);
+      var lr  = gR;
+      var lx  = gCX + lr * Math.cos(ang);
+      var ly  = gCY + lr * Math.sin(ang);
+      gCtx.fillStyle = '#fff';
+      gCtx.fillText(lp.text, lx, ly);
+    });
+
+    /* Scale ticks at 0% and +50% */
+    [0, 50].forEach(function(t) {
+      var p    = returnToPct(t);
+      var ang  = pctToCanvasAngle(p);
+      var cosA = Math.cos(ang), sinA = Math.sin(ang);
+      var inner = gR - LINE_W / 2 - 2;
+      var outer = gR + LINE_W / 2 + 2;
+      gCtx.strokeStyle = 'rgba(255,255,255,0.7)';
+      gCtx.lineWidth   = 1.5;
+      gCtx.beginPath();
+      gCtx.moveTo(gCX + inner * cosA, gCY + inner * sinA);
+      gCtx.lineTo(gCX + outer * cosA, gCY + outer * sinA);
+      gCtx.stroke();
+      /* Tick label */
+      var labelR = outer + 8;
+      gCtx.fillStyle    = '#64748b';
+      gCtx.font         = '8px Inter, sans-serif';
+      gCtx.textAlign    = 'center';
+      gCtx.textBaseline = 'middle';
+      gCtx.fillText(t + '%', gCX + labelR * cosA, gCY + labelR * sinA);
+    });
+
+    /* Needle */
+    if (showNeedle) {
+      var nAng = pctToCanvasAngle(needlePct);
+      var nLen = gR - LINE_W / 2 - 3;
+      var nx   = gCX + nLen * Math.cos(nAng);
+      var ny   = gCY + nLen * Math.sin(nAng);
+
+      gCtx.strokeStyle = '#0f172a';
+      gCtx.lineWidth   = 3;
+      gCtx.lineCap     = 'round';
+      gCtx.beginPath();
+      gCtx.moveTo(gCX, gCY);
+      gCtx.lineTo(nx, ny);
+      gCtx.stroke();
+
+      /* Centre cap */
+      gCtx.fillStyle = '#0f172a';
+      gCtx.beginPath();
+      gCtx.arc(gCX, gCY, 5, 0, Math.PI * 2);
+      gCtx.fill();
+    } else {
+      /* Grey cap when no needle yet */
+      gCtx.fillStyle = '#cbd5e1';
+      gCtx.beginPath();
+      gCtx.arc(gCX, gCY, 5, 0, Math.PI * 2);
+      gCtx.fill();
+    }
+
+    /* Min / Max labels — centred below the arc endpoints */
+    gCtx.fillStyle    = '#94a3b8';
+    gCtx.font         = '8px Inter, sans-serif';
+    gCtx.textBaseline = 'top';
+    gCtx.textAlign    = 'center';
+    gCtx.fillText('−50%',  gCX - gR, gCY + 6);
+    gCtx.fillText('+100%', gCX + gR, gCY + 6);
+  }
+
+  /* Initial draw — zones visible, no needle */
+  drawGauge(0, false);
+
+  /* ════════════════════════════════════════════════
+     BELIEF CHART
+  ════════════════════════════════════════════════ */
+  var beliefChart = new Chart(
+    document.getElementById('belief-chart').getContext('2d'),
+    {
+      type: 'bar',
+      data: {
+        labels: BIN_LABELS,
+        datasets: [{
+          label: 'Your Beliefs',
+          data: PARTICIPANT_PROBS.map(function(p) { return +(p * 100).toFixed(1); }),
+          backgroundColor: 'rgba(37, 99, 235, 0.55)',
+          borderColor: '#2563eb',
+          borderWidth: 1,
+          borderRadius: 3,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(c) {
+                return c.dataset.label + ': ' + c.parsed.y.toFixed(1) + '%';
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            ticks: { font: { size: 8 }, maxRotation: 30, minRotation: 30 },
+            grid: { display: false }
+          },
+          y: {
+            min: 0,
+            max: 50,
+            ticks: {
+              callback: function(v) { return v + '%'; },
+              font: { size: 8 },
+              stepSize: 10
+            },
+            grid: { color: '#f1f5f9' }
+          }
+        }
+      }
+    }
+  );
+
+  /* ════════════════════════════════════════════════
+     REVEAL
+  ════════════════════════════════════════════════ */
+  var revealed = false;
+
+  function revealResults() {
+    if (revealed) return;
+    revealed = true;
+
+    var btn = document.getElementById('reveal-btn');
+    btn.disabled    = true;
+    btn.textContent = 'Results Revealed';
+
+    /* ── Card 1: Highlight winning gamble row ── */
+    var winRow   = GAMBLE_RESULT === 'A' ? 'row-a'   : 'row-b';
+    var winBadge = GAMBLE_RESULT === 'A' ? 'badge-a' : 'badge-b';
+    document.getElementById(winRow).classList.add('winner');
+    document.getElementById(winBadge).style.display = 'block';
+    document.getElementById('gamble-payout-val').style.opacity = '1';
+
+    /* ── Card 2: Animate needle ── */
+    var targetPct  = returnToPct(SIMULATED_RETURN);
+    var animDur    = 1400;  /* ms */
+    var animStart  = null;
+
+    function animateNeedle(ts) {
+      if (!animStart) animStart = ts;
+      var elapsed = ts - animStart;
+      var t = Math.min(elapsed / animDur, 1);
+      /* Ease-out cubic */
+      var ease = 1 - Math.pow(1 - t, 3);
+      drawGauge(ease * targetPct, true);
+
+      if (t < 1) {
+        requestAnimationFrame(animateNeedle);
+      } else {
+        /* Final state */
+        drawGauge(targetPct, true);
+        document.getElementById('gauge-label').textContent =
+          (SIMULATED_RETURN > 0 ? '+' : '') + SIMULATED_RETURN.toFixed(1) + '%';
+        document.getElementById('gauge-label').style.opacity  = '1';
+        document.getElementById('portfolio-payout-val').style.opacity = '1';
+      }
+    }
+    requestAnimationFrame(animateNeedle);
+
+    /* ── Card 3: Add actual distribution dataset ── */
+    beliefChart.data.datasets.push({
+      label: 'Actual Distribution',
+      data: ACTUAL_DIST.map(function(p) { return +(p * 100).toFixed(1); }),
+      backgroundColor: 'rgba(15, 23, 42, 0.65)',
+      borderColor: '#0f172a',
+      borderWidth: 1,
+      borderRadius: 3,
+    });
+    beliefChart.update('active');
+
+    document.getElementById('actual-legend').style.display = 'inline';
+    document.getElementById('belief-score-val').textContent =
+      (BELIEF_SCORE * 100).toFixed(1) + '%';
+    document.getElementById('belief-score-val').style.opacity  = '1';
+    document.getElementById('belief-payout-val').style.opacity = '1';
+
+    /* ── Show totals & next button ── */
+    setTimeout(function() {
+      document.getElementById('payout-totals').style.display   = 'block';
+      document.getElementById('next-btn-wrap').style.display   = 'block';
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }, 1600);
+  }
+</script>
+
+{% endblock %}

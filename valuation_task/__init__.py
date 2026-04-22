@@ -1,3 +1,4 @@
+import math
 import random
 from otree.api import *
 
@@ -119,6 +120,13 @@ class BeliefElicitation(Page):
         if a_total != 20:
             return f'AI Advisor tokens sum to {a_total}. Please use all 20 tokens.'
 
+    @staticmethod
+    def before_next_page(player: Player, timeout_happened):
+        player.participant.vars['beliefs_timing'] = 'after'
+        for i in range(1, 8):
+            player.participant.vars[f'h_bin{i}'] = getattr(player, f'h_bin{i}')
+            player.participant.vars[f'a_bin{i}'] = getattr(player, f'a_bin{i}')
+
 
 class ValuationHuman(Page):
     template_name = 'valuation_task/Valuation.html'
@@ -142,4 +150,113 @@ class ValuationAI(Page):
                     field_name='switch_point_ai', advisor_num=2)
 
 
-page_sequence = [PortfolioConstruction, ValuationHuman, ValuationAI, BeliefElicitation]
+_ACTUAL_DISTS = {
+    'human': [0.03, 0.07, 0.15, 0.22, 0.28, 0.18, 0.07],
+    'ai':    [0.05, 0.08, 0.12, 0.18, 0.25, 0.20, 0.12],
+}
+_BIN_RANGES = [(-50,-25), (-25,-15), (-15,-5), (-5,5), (5,15), (15,25), (25,60)]
+_GAMBLE_MAX = 42   # max raw gamble outcome (option 5A = $42)
+_NOTIONAL   = 50000
+_SCALE      = 10000  # $10,000 notional = $1 real
+
+
+class Payout(Page):
+    @staticmethod
+    def vars_for_template(player: Player):
+        if 'payout_data' in player.participant.vars:
+            return player.participant.vars['payout_data']
+
+        # ── Component 1: Gamble 50/50 draw ──
+        gamble_choice = player.participant.vars.get('gamble_choice', 1)
+        gamble_a      = player.participant.vars.get('gamble_a', 10)
+        gamble_b      = player.participant.vars.get('gamble_b', 10)
+        gamble_result = random.choice(['A', 'B'])
+        gamble_raw    = gamble_a if gamble_result == 'A' else gamble_b
+        gamble_payout = round(gamble_raw * 5 / _GAMBLE_MAX, 2)
+
+        # ── Component 2: Portfolio performance ──
+        selected_advisor = random.choice(['human', 'ai'])
+        selected_fee     = random.randint(1, 10)
+        sw           = player.switch_point_human if selected_advisor == 'human' else player.switch_point_ai
+        advisor_label = 'Human Wealth Manager' if selected_advisor == 'human' else 'AI Advisor'
+        uses_advisor  = (selected_fee <= sw)
+        actual_dist   = _ACTUAL_DISTS[selected_advisor]
+
+        if uses_advisor:
+            bin_idx = random.choices(range(7), weights=actual_dist)[0]
+            lo, hi  = _BIN_RANGES[bin_idx]
+            simulated_return = round(random.uniform(lo, hi), 1)
+        else:
+            mus   = [4,  8,  7, 12, 15]
+            sigs  = [2, 12, 18, 28, 55]
+            allocs = [player.alloc_tbills, player.alloc_index, player.alloc_reits,
+                      player.alloc_stocks, player.alloc_crypto]
+            mu  = sum(a/100 * m for a, m in zip(allocs, mus))
+            sig = math.sqrt(sum((a/100)**2 * s**2 for a, s in zip(allocs, sigs)))
+            simulated_return = round(random.gauss(mu, sig), 1)
+
+        notional_gain    = _NOTIONAL * simulated_return / 100
+        portfolio_base   = notional_gain / _SCALE        # 5 * return/100, max $5
+        portfolio_payout = round(portfolio_base - (selected_fee if uses_advisor else 0), 2)
+
+        # ── Component 3: Belief scoring (quadratic) ──
+        h_bins = [player.participant.vars.get(f'h_bin{i}', getattr(player, f'h_bin{i}', 0))
+                  for i in range(1, 8)]
+        a_bins = [player.participant.vars.get(f'a_bin{i}', getattr(player, f'a_bin{i}', 0))
+                  for i in range(1, 8)]
+        participant_bins = h_bins if selected_advisor == 'human' else a_bins
+        total_tokens     = sum(participant_bins) or 1
+        participant_probs = [b / total_tokens for b in participant_bins]
+
+        belief_score  = max(0.0, 1.0 - sum(
+            (actual_dist[i] - participant_probs[i])**2 for i in range(7)))
+        belief_payout = round(belief_score * 5, 2)
+
+        # ── Total ──
+        variable_raw      = gamble_payout + portfolio_payout + belief_payout
+        performance_payout = round(max(0.0, variable_raw), 2)
+        total_payout       = round(5.00 + performance_payout, 2)
+
+        # Pre-format display strings (handles negatives cleanly)
+        def fmt(v):
+            return f'+${v:.2f}' if v >= 0 else f'−${abs(v):.2f}'
+
+        data = dict(
+            # Component 1
+            gamble_choice=gamble_choice,
+            gamble_a=gamble_a,
+            gamble_b=gamble_b,
+            gamble_a_display=f'${gamble_a}' if gamble_a >= 0 else f'−${abs(gamble_a)}',
+            gamble_b_display=f'${gamble_b}' if gamble_b >= 0 else f'−${abs(gamble_b)}',
+            gamble_result=gamble_result,
+            gamble_raw=gamble_raw,
+            gamble_payout=gamble_payout,
+            gamble_payout_display=fmt(gamble_payout),
+            # Component 2
+            selected_advisor=selected_advisor,
+            advisor_label=advisor_label,
+            selected_fee=selected_fee,
+            switch_point=sw,
+            uses_advisor=uses_advisor,
+            simulated_return=simulated_return,
+            portfolio_payout=portfolio_payout,
+            portfolio_payout_display=fmt(portfolio_payout),
+            notional_gain=round(notional_gain),
+            # Component 3
+            actual_dist=actual_dist,
+            participant_probs=[round(p, 4) for p in participant_probs],
+            beliefs_timing=player.participant.vars.get('beliefs_timing', 'unknown'),
+            belief_score=round(belief_score, 3),
+            belief_payout=belief_payout,
+            # Total
+            variable_raw=round(variable_raw, 2),
+            variable_raw_display=fmt(round(variable_raw, 2)),
+            performance_payout=performance_payout,
+            total_payout=total_payout,
+        )
+
+        player.participant.vars['payout_data'] = data
+        return data
+
+
+page_sequence = [PortfolioConstruction, ValuationHuman, ValuationAI, BeliefElicitation, Payout]
