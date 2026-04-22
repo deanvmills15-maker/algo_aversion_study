@@ -232,7 +232,10 @@
     <span class="pc-stage-badge">Stage 2 of 3 — Portfolio Construction</span>
     <h2>Build Your Portfolio</h2>
     <p class="pc-sub">
-      Allocate 100% across the five asset classes. Adjust the sliders —
+      You are distributing a hypothetical <strong>$50,000 investment account</strong>
+      across five asset classes. Every <strong>$10,000</strong> in this account corresponds
+      to <strong>$1</strong> in your study payment — so the simulated performance of
+      your portfolio directly affects your earnings. Adjust the sliders to reach 100%;
       unlocked assets scale proportionally. Lock any asset to hold it fixed.
     </p>
   </div>
@@ -382,6 +385,10 @@
                   Est. Return Range (±1σ)
                   <span class="pc-stat-val" id="wtd-return">−4% to +22%</span>
                 </div>
+                <div class="pc-stat" style="font-size:.78rem; color:#94a3b8">
+                  Payment impact on $50,000
+                  <span style="font-weight:600; color:#64748b" id="dollar-range">−$2 to +$11</span>
+                </div>
                 <div class="pc-stat">
                   Total Allocated
                   <span class="pc-stat-val total-ok" id="total-display">100%</span>
@@ -401,7 +408,7 @@
   <p class="text-center mt-1" style="font-size:.85rem; color:#475569;">
     Total: <strong><span id="plain-total" style="color:#15803d">100</span>%</strong>
   </p>
-  <p class="pc-footnote">Your allocation will be recorded for the next stage of the study.</p>
+  <p class="pc-footnote">Your $50,000 allocation will be used to simulate portfolio performance — every $10,000 gain or loss translates to $1 in your study payment.</p>
 </div>
 
 <script>
@@ -606,8 +613,19 @@
     });
 
     var portSigma = Math.sqrt(portVar);
+    var retLo = portMean - portSigma;
+    var retHi = portMean + portSigma;
     document.getElementById('wtd-return').textContent =
-      fmtPct(portMean - portSigma) + ' to ' + fmtPct(portMean + portSigma);
+      fmtPct(retLo) + ' to ' + fmtPct(retHi);
+
+    /* Dollar impact: $50,000 notional, $10,000 = $1 real */
+    function fmtDollar(pct) {
+      var dollars = (50000 * pct / 100) / 10000;
+      var rounded = Math.round(dollars * 10) / 10;
+      return (rounded >= 0 ? '+' : '') + '$' + Math.abs(rounded).toFixed(1);
+    }
+    document.getElementById('dollar-range').textContent =
+      fmtDollar(retLo) + ' to ' + fmtDollar(retHi);
 
     var totalEl = document.getElementById('total-display');
     totalEl.textContent = total + '%';
