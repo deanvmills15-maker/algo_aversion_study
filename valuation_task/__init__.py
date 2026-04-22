@@ -48,8 +48,9 @@ class Group(BaseGroup):
 
 
 class Player(BasePlayer):
-    switch_point_human = models.IntegerField(label='', min=0, max=10)
-    switch_point_ai    = models.IntegerField(label='', min=0, max=10)
+    # Switch points: 0 = never pay, 10 = always pay; initial=0 prevents None at Payout
+    switch_point_human = models.IntegerField(label='', min=0, max=10, initial=0)
+    switch_point_ai    = models.IntegerField(label='', min=0, max=10, initial=0)
 
     # Portfolio allocation (sums to 100)
     alloc_tbills  = models.IntegerField(initial=20, min=0, max=100, label='T-Bills')
@@ -75,6 +76,20 @@ class Player(BasePlayer):
     a_bin5 = models.IntegerField(initial=0, min=0, max=20, label='AI Bin 5')
     a_bin6 = models.IntegerField(initial=0, min=0, max=20, label='AI Bin 6')
     a_bin7 = models.IntegerField(initial=0, min=0, max=20, label='AI Bin 7')
+
+    # ── Payout outcome fields (written by Payout.before_next_page) ──
+    # Stored here so they appear in the standard CSV export.
+    beliefs_timing          = models.StringField(initial='')
+    beliefs_before          = models.BooleanField(initial=False)
+    payout_gamble_result    = models.StringField(initial='')
+    payout_advisor          = models.StringField(initial='')
+    payout_fee              = models.IntegerField(initial=0)
+    payout_uses_advisor     = models.BooleanField(initial=False)
+    payout_simulated_return = models.FloatField(initial=0.0)
+    payout_gamble_amount    = models.FloatField(initial=0.0)
+    payout_portfolio_amount = models.FloatField(initial=0.0)
+    payout_belief_amount    = models.FloatField(initial=0.0)
+    payout_total            = models.FloatField(initial=0.0)
 
 
 class PortfolioConstruction(Page):
@@ -257,6 +272,24 @@ class Payout(Page):
 
         player.participant.vars['payout_data'] = data
         return data
+
+    @staticmethod
+    def before_next_page(player: Player, timeout_happened):
+        data = player.participant.vars.get('payout_data', {})
+        # Persist all payout outcomes to Player fields for CSV export
+        player.beliefs_timing          = data.get('beliefs_timing', '')
+        player.beliefs_before          = bool(player.participant.vars.get('beliefs_before', False))
+        player.payout_gamble_result    = data.get('gamble_result', '')
+        player.payout_advisor          = data.get('selected_advisor', '')
+        player.payout_fee              = data.get('selected_fee') or 0
+        player.payout_uses_advisor     = bool(data.get('uses_advisor', False))
+        player.payout_simulated_return = data.get('simulated_return') or 0.0
+        player.payout_gamble_amount    = data.get('gamble_payout') or 0.0
+        player.payout_portfolio_amount = data.get('portfolio_payout') or 0.0
+        player.payout_belief_amount    = data.get('belief_payout') or 0.0
+        player.payout_total            = data.get('total_payout') or 0.0
+        # Set oTree's built-in payoff field for earnings accounting
+        player.payoff                  = cu(player.payout_total)
 
 
 page_sequence = [PortfolioConstruction, ValuationHuman, ValuationAI, BeliefElicitation, Payout]
